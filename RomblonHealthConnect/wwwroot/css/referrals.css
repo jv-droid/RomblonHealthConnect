@@ -1,0 +1,966 @@
+/* ==========================================================================
+   Romblon HealthConnect — Smart Referral Engine
+   Extends the Phase 2 token system in site.css. Card, badge, table, and button
+   primitives are reused from dashboard.css rather than redefined.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Page furniture
+   -------------------------------------------------------------------------- */
+.page-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    flex-wrap: wrap;
+    margin-bottom: var(--rhc-space-2);
+}
+
+.page-toolbar-spacer {
+    margin-left: auto;
+}
+
+/* Vertical rhythm between stacked sections. */
+.section-spaced {
+    margin-top: var(--rhc-space-2);
+}
+
+/* Inline confirmation and error feedback after a workflow action. */
+.rhc-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-2);
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-size: var(--rhc-text-base);
+    border: 1px solid transparent;
+    border-radius: var(--rhc-radius-md);
+}
+
+.rhc-alert-success {
+    color: #0B5A0B;
+    background: var(--rhc-success-subtle);
+    border-color: #C6E4C6;
+}
+
+.rhc-alert-error {
+    color: #A32B2E;
+    background: var(--rhc-danger-subtle);
+    border-color: #F3C9CA;
+}
+
+.rhc-alert-icon {
+    margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Filter bar
+   -------------------------------------------------------------------------- */
+.filter-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--rhc-space-1);
+    align-items: end;
+    padding: var(--rhc-space-2);
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-half);
+    min-width: 0;
+}
+
+.filter-label {
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    color: var(--rhc-text-secondary);
+}
+
+.filter-actions {
+    display: flex;
+    gap: var(--rhc-space-half);
+}
+
+/* Shared form control styling for the filter bar and the wizard. */
+.rhc-input,
+.rhc-select,
+.rhc-textarea {
+    width: 100%;
+    padding: 0 var(--rhc-space-1);
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border-strong);
+    border-radius: var(--rhc-radius-sm);
+    transition: border-color var(--rhc-duration) var(--rhc-ease), box-shadow var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-input,
+.rhc-select {
+    height: 32px;
+}
+
+.rhc-textarea {
+    min-height: 84px;
+    padding: var(--rhc-space-1);
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.rhc-input:hover,
+.rhc-select:hover,
+.rhc-textarea:hover {
+    border-color: var(--rhc-text-tertiary);
+}
+
+.rhc-input:focus,
+.rhc-select:focus,
+.rhc-textarea:focus {
+    outline: none;
+    border-color: var(--rhc-primary);
+    box-shadow: 0 0 0 1px var(--rhc-primary);
+}
+
+.rhc-field-error {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-danger);
+}
+
+.rhc-input.input-validation-error,
+.rhc-select.input-validation-error,
+.rhc-textarea.input-validation-error {
+    border-color: var(--rhc-danger);
+}
+
+/* --------------------------------------------------------------------------
+   3. Referral metric cards
+   -------------------------------------------------------------------------- */
+.referral-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+    margin-bottom: var(--rhc-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   4. Table extras
+   -------------------------------------------------------------------------- */
+.referral-table td,
+.referral-table th {
+    white-space: nowrap;
+}
+
+.referral-number {
+    font-family: var(--rhc-font-mono);
+    font-size: var(--rhc-text-sm);
+    font-weight: 600;
+    color: var(--rhc-primary);
+}
+
+.referral-number:hover {
+    text-decoration: underline;
+}
+
+.row-actions {
+    display: flex;
+    gap: var(--rhc-space-half);
+    justify-content: flex-end;
+}
+
+/* Emergency rows carry a leading accent so they read at a glance. */
+.referral-table tbody tr[data-priority="Emergency"] td:first-child {
+    box-shadow: inset 3px 0 0 var(--rhc-danger);
+}
+
+.referral-table tbody tr[data-priority="Urgent"] td:first-child {
+    box-shadow: inset 3px 0 0 var(--rhc-warning);
+}
+
+.empty-state {
+    padding: var(--rhc-space-6) var(--rhc-space-3);
+    text-align: center;
+    color: var(--rhc-text-secondary);
+}
+
+.empty-state-icon {
+    display: block;
+    margin-bottom: var(--rhc-space-1);
+    font-size: 28px;
+    color: var(--rhc-border-strong);
+}
+
+.empty-state-title {
+    font-size: var(--rhc-text-md);
+    font-weight: 600;
+    color: var(--rhc-text);
+}
+
+/* --------------------------------------------------------------------------
+   5. Pagination
+   -------------------------------------------------------------------------- */
+.rhc-pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+}
+
+.rhc-pagination-summary {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.rhc-pagination-controls {
+    display: flex;
+    gap: var(--rhc-space-half);
+    margin-left: auto;
+}
+
+.rhc-pagination .rhc-btn[aria-disabled="true"] {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. Create wizard
+   -------------------------------------------------------------------------- */
+.wizard-layout {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: var(--rhc-space-2);
+    align-items: start;
+}
+
+/* Step rail */
+.wizard-steps {
+    position: sticky;
+    top: 0;
+    margin: 0;
+    padding: var(--rhc-space-1);
+    list-style: none;
+    counter-reset: wizard-step;
+}
+
+.wizard-step {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    width: 100%;
+    padding: var(--rhc-space-1);
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    text-align: left;
+    color: var(--rhc-text-secondary);
+    background: transparent;
+    border: 0;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.wizard-step:hover:not(:disabled) {
+    background: var(--rhc-surface-hover);
+}
+
+.wizard-step:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.wizard-step-number {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    border-radius: 50%;
+}
+
+.wizard-step.is-active {
+    font-weight: 600;
+    color: var(--rhc-primary);
+    background: var(--rhc-primary-subtle);
+}
+
+.wizard-step.is-active .wizard-step-number {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary);
+}
+
+.wizard-step.is-complete .wizard-step-number {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-success);
+}
+
+/* Panels */
+.wizard-panel {
+    display: none;
+}
+
+.wizard-panel.is-active {
+    display: block;
+}
+
+.wizard-panel-header {
+    margin-bottom: var(--rhc-space-2);
+}
+
+.wizard-panel-title {
+    font-size: var(--rhc-text-lg);
+    font-weight: 600;
+}
+
+.wizard-panel-hint {
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.wizard-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2);
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.wizard-footer-spacer {
+    margin-left: auto;
+}
+
+.wizard-progress {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   7. Selectable option lists (patients, hospitals, doctors)
+   -------------------------------------------------------------------------- */
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-half);
+    max-height: 340px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 2px;
+    list-style: none;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    width: 100%;
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-family: inherit;
+    text-align: left;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    cursor: pointer;
+    transition: border-color var(--rhc-duration) var(--rhc-ease), background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.option-card:hover {
+    background: var(--rhc-surface-alt);
+    border-color: var(--rhc-border-strong);
+}
+
+.option-card.is-selected {
+    background: var(--rhc-primary-subtle);
+    border-color: var(--rhc-primary);
+}
+
+.option-card:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.option-card-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.option-card-title {
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+    color: var(--rhc-text);
+}
+
+.option-card-meta {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.option-card-trailing {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    flex-shrink: 0;
+}
+
+/* Facility type dot reusing the map marker palette. */
+.facility-dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.facility-dot-public { background: var(--rhc-type-public); }
+.facility-dot-district { background: var(--rhc-type-district); }
+.facility-dot-rhu { background: var(--rhc-type-rhu); }
+.facility-dot-private { background: var(--rhc-type-private); }
+
+/* --------------------------------------------------------------------------
+   8. Destination hospital capability card
+   -------------------------------------------------------------------------- */
+.capability-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--rhc-space-2);
+}
+
+.capability-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-2);
+}
+
+.capability-stat {
+    padding: var(--rhc-space-1);
+    text-align: center;
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+}
+
+.capability-stat-value {
+    font-size: var(--rhc-text-xl);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.capability-stat-label {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-secondary);
+}
+
+.capability-section + .capability-section {
+    margin-top: var(--rhc-space-2);
+}
+
+.capability-section-label {
+    margin-bottom: var(--rhc-space-half);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.wizard-map-shell {
+    position: relative;
+    height: 320px;
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   9. Attachments
+   -------------------------------------------------------------------------- */
+.dropzone {
+    display: grid;
+    place-items: center;
+    gap: var(--rhc-space-half);
+    padding: var(--rhc-space-4) var(--rhc-space-2);
+    text-align: center;
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-surface-alt);
+    border: 1px dashed var(--rhc-border-strong);
+    border-radius: var(--rhc-radius-md);
+    cursor: pointer;
+    transition: border-color var(--rhc-duration) var(--rhc-ease), background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+    color: var(--rhc-primary);
+    background: var(--rhc-primary-subtle);
+    border-color: var(--rhc-primary);
+}
+
+.dropzone-icon {
+    font-size: 22px;
+}
+
+.dropzone-hint {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-tertiary);
+}
+
+.attachment-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--rhc-space-1);
+    margin-top: var(--rhc-space-2);
+}
+
+.attachment-card {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-1);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+}
+
+.attachment-thumb {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.attachment-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.attachment-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.attachment-name {
+    font-size: var(--rhc-text-base);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attachment-meta {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   10. Review step
+   -------------------------------------------------------------------------- */
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+}
+
+.review-block {
+    padding: var(--rhc-space-2);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+}
+
+.review-block-title {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    margin-bottom: var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   11. Referral details and timeline
+   -------------------------------------------------------------------------- */
+.details-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--rhc-space-2);
+    align-items: start;
+}
+
+.details-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-2);
+    min-width: 0;
+}
+
+.referral-route {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    padding: var(--rhc-space-2);
+}
+
+.route-node {
+    flex: 1;
+    min-width: 0;
+}
+
+.route-node-label {
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.route-node-name {
+    font-size: var(--rhc-text-md);
+    font-weight: 600;
+}
+
+.route-node-meta {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.route-connector {
+    flex-shrink: 0;
+    color: var(--rhc-text-tertiary);
+}
+
+/* Timeline */
+.timeline {
+    margin: 0;
+    padding: var(--rhc-space-2);
+    list-style: none;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    gap: var(--rhc-space-2);
+    padding-bottom: var(--rhc-space-3);
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+/* Connector line between markers. */
+.timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 26px;
+    bottom: 2px;
+    left: 12px;
+    width: 1px;
+    background: var(--rhc-border);
+}
+
+.timeline-marker {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+    color: var(--rhc-text-inverse);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.timeline-marker-default { background: var(--rhc-secondary); }
+.timeline-marker-success { background: var(--rhc-success); }
+.timeline-marker-warning { background: var(--rhc-warning); }
+.timeline-marker-danger { background: var(--rhc-danger); }
+
+.timeline-body {
+    min-width: 0;
+    flex: 1;
+    padding-top: 2px;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-1);
+}
+
+.timeline-label {
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+}
+
+.timeline-time {
+    font-size: var(--rhc-text-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--rhc-text-tertiary);
+}
+
+.timeline-notes {
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.timeline-actor {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* Response action forms in the details sidebar. */
+.action-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2);
+}
+
+.action-form + .action-form {
+    border-top: 1px solid var(--rhc-divider);
+}
+
+/* --------------------------------------------------------------------------
+   12. Notification centre
+   -------------------------------------------------------------------------- */
+.notification-panel {
+    position: fixed;
+    top: var(--rhc-topbar-height);
+    right: var(--rhc-space-2);
+    z-index: 80;
+    width: 360px;
+    max-width: calc(100vw - var(--rhc-space-3));
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease),
+                visibility var(--rhc-duration);
+}
+
+.notification-panel.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notification-header {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-divider);
+}
+
+.notification-title {
+    font-size: var(--rhc-text-md);
+    font-weight: 600;
+}
+
+.notification-list {
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.notification-item {
+    display: flex;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-divider);
+}
+
+.notification-item:last-child {
+    border-bottom: 0;
+}
+
+.notification-item.is-unread {
+    background: var(--rhc-primary-subtle);
+}
+
+.notification-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-secondary);
+    background: var(--rhc-info-subtle);
+    border-radius: 50%;
+}
+
+.notification-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.notification-item-title {
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+}
+
+.notification-message {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.notification-time {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* Transient toast raised by a live SignalR event. */
+.toast-stack {
+    position: fixed;
+    right: var(--rhc-space-2);
+    bottom: var(--rhc-space-2);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-1);
+    width: 320px;
+    max-width: calc(100vw - var(--rhc-space-3));
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-left: 3px solid var(--rhc-primary);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-3);
+    animation: toast-in var(--rhc-duration-slow) var(--rhc-ease);
+}
+
+.toast-title {
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+}
+
+.toast-message {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Live-update highlight on a table row. */
+@keyframes row-flash {
+    from { background-color: var(--rhc-primary-subtle); }
+    to { background-color: transparent; }
+}
+
+.referral-table tbody tr.is-updated {
+    animation: row-flash 1.6s var(--rhc-ease);
+}
+
+/* --------------------------------------------------------------------------
+   13. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1400px) {
+    .details-layout {
+        grid-template-columns: minmax(0, 1fr) 300px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .referral-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .details-layout,
+    .capability-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wizard-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* The step rail becomes a horizontal scroller above the panel. */
+    .wizard-steps {
+        position: static;
+        display: flex;
+        gap: var(--rhc-space-half);
+        overflow-x: auto;
+    }
+
+    .wizard-step {
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 900px) {
+    .referral-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .review-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 720px) {
+    .referral-metrics {
+        display: flex;
+        gap: var(--rhc-space-1);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: var(--rhc-space-1);
+    }
+
+    .referral-metrics > * {
+        flex: 0 0 200px;
+        scroll-snap-align: start;
+    }
+
+    .filter-bar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .capability-stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notification-panel {
+        left: var(--rhc-space-1);
+        right: var(--rhc-space-1);
+        width: auto;
+    }
+
+    .toast-stack {
+        left: var(--rhc-space-1);
+        right: var(--rhc-space-1);
+        width: auto;
+    }
+}

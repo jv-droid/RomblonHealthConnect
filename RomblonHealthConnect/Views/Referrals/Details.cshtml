@@ -1,0 +1,292 @@
+@model ReferralDetailsViewModel
+
+@* Full referral record: route, clinical detail, attachments, timeline, and actions. *@
+
+@{
+    var referral = Model.Referral;
+}
+
+<partial name="_StatusMessages" />
+
+<div class="page-toolbar">
+    <a class="rhc-btn" asp-action="Index">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i> All referrals
+    </a>
+
+    <span class="rhc-badge @ReferralDisplay.StatusBadgeClass(referral.Status)">
+        @ReferralDisplay.StatusLabel(referral.Status)
+    </span>
+    <span class="rhc-badge @ReferralDisplay.PriorityBadgeClass(referral.Priority)">
+        @ReferralDisplay.PriorityLabel(referral.Priority)
+    </span>
+
+    <span class="page-toolbar-spacer"></span>
+
+    @if (Model.CanSubmit)
+    {
+        <form method="post" asp-action="Submit" asp-route-id="@referral.Id">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="rhc-btn rhc-btn-primary">
+                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send Referral
+            </button>
+        </form>
+    }
+</div>
+
+<div class="details-layout">
+
+    <!-- Primary column -->
+    <div class="details-column">
+
+        <section class="rhc-card" aria-labelledby="route-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="route-heading">@referral.ReferralNumber</h2>
+                    <p class="rhc-card-subtitle">
+                        Created @referral.CreatedUtc.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                    </p>
+                </div>
+            </div>
+
+            <div class="referral-route">
+                <div class="route-node">
+                    <p class="route-node-label">Origin</p>
+                    <p class="route-node-name">@referral.OriginHospital.Name</p>
+                    <p class="route-node-meta">@referral.OriginHospital.Municipality</p>
+                </div>
+
+                <i class="fa-solid fa-arrow-right-long route-connector fa-lg" aria-hidden="true"></i>
+
+                <div class="route-node">
+                    <p class="route-node-label">Destination</p>
+                    <p class="route-node-name">@referral.DestinationHospital.Name</p>
+                    <p class="route-node-meta">@referral.DestinationHospital.Municipality</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="rhc-card" aria-labelledby="patient-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="patient-heading">Patient and clinical detail</h2>
+                </div>
+            </div>
+            <div class="rhc-card-body">
+                <dl class="info-list">
+                    <div class="info-row">
+                        <dt class="info-row-label">Patient</dt>
+                        <dd class="info-row-value">
+                            @referral.Patient.FullName (@referral.Patient.PatientNumber)
+                        </dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Age / Sex</dt>
+                        <dd class="info-row-value">@referral.Patient.Age · @referral.Patient.Sex</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Blood type</dt>
+                        <dd class="info-row-value">@(referral.Patient.BloodType ?? "Not recorded")</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Specialty requested</dt>
+                        <dd class="info-row-value">@referral.RequestedSpecialization.Name</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Assigned doctor</dt>
+                        <dd class="info-row-value">@(referral.AssignedDoctor?.FullName ?? "Not yet assigned")</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Referring doctor</dt>
+                        <dd class="info-row-value">@(referral.ReferringDoctor?.FullName ?? "Not specified")</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Reason</dt>
+                        <dd class="info-row-value">@referral.ReasonForReferral</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Diagnosis</dt>
+                        <dd class="info-row-value">@(referral.Diagnosis ?? "Not recorded")</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt class="info-row-label">Clinical notes</dt>
+                        <dd class="info-row-value">@(referral.ClinicalNotes ?? "None")</dd>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(referral.ResponseNotes))
+                    {
+                        <div class="info-row">
+                            <dt class="info-row-label">Response</dt>
+                            <dd class="info-row-value">@referral.ResponseNotes</dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </section>
+
+        <section class="rhc-card" aria-labelledby="attachments-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="attachments-heading">Attachments</h2>
+                    <p class="rhc-card-subtitle">@Model.Attachments.Count file(s)</p>
+                </div>
+            </div>
+            <div class="rhc-card-body">
+                @if (Model.Attachments.Count == 0)
+                {
+                    <div class="empty-state">
+                        <i class="fa-solid fa-paperclip empty-state-icon" aria-hidden="true"></i>
+                        <p class="empty-state-title">No attachments</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="attachment-list">
+                        @foreach (var attachment in Model.Attachments)
+                        {
+                            <a class="attachment-card" href="/uploads/referrals/@attachment.StoredFileName"
+                               target="_blank" rel="noopener">
+                                <span class="attachment-thumb">
+                                    @if (attachment.IsPreviewable)
+                                    {
+                                        <img src="/uploads/referrals/@attachment.StoredFileName"
+                                             alt="Preview of @attachment.FileName" />
+                                    }
+                                    else
+                                    {
+                                        @attachment.Extension
+                                    }
+                                </span>
+                                <span class="attachment-body">
+                                    <span class="attachment-name">@attachment.FileName</span>
+                                    <span class="attachment-meta">
+                                        @attachment.Category · @attachment.DisplaySize
+                                    </span>
+                                </span>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+
+    <!-- Sidebar: timeline and actions -->
+    <div class="details-column">
+
+        <section class="rhc-card" aria-labelledby="timeline-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="timeline-heading">Timeline</h2>
+                    <p class="rhc-card-subtitle">Every recorded action on this referral</p>
+                </div>
+            </div>
+
+            <ol class="timeline">
+                @foreach (var entry in Model.Timeline)
+                {
+                    <li class="timeline-item">
+                        <span class="timeline-marker @entry.ToneClass" aria-hidden="true">
+                            <i class="fa-solid @entry.Icon"></i>
+                        </span>
+                        <div class="timeline-body">
+                            <div class="timeline-header">
+                                <span class="timeline-label">@entry.Label</span>
+                                <span class="timeline-time">
+                                    @entry.OccurredUtc.ToLocalTime().ToString("HH:mm")
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(entry.Notes))
+                            {
+                                <p class="timeline-notes">@entry.Notes</p>
+                            }
+                            <p class="timeline-actor">
+                                @entry.PerformedBy · @entry.OccurredUtc.ToLocalTime().ToString("dd MMM yyyy")
+                            </p>
+                        </div>
+                    </li>
+                }
+            </ol>
+        </section>
+
+        @if (Model.CanRespond || Model.CanComplete || Model.CanCancel)
+        {
+            <section class="rhc-card" aria-labelledby="actions-heading">
+                <div class="rhc-card-header">
+                    <div class="rhc-card-heading">
+                        <h2 class="rhc-card-title" id="actions-heading">Actions</h2>
+                    </div>
+                </div>
+
+                @if (Model.CanRespond)
+                {
+                    <form class="action-form" method="post" asp-action="Accept" asp-route-id="@referral.Id">
+                        @Html.AntiForgeryToken()
+                        <label class="filter-label" for="assignedDoctorId">Assign a doctor (optional)</label>
+                        <select class="rhc-select" id="assignedDoctorId" name="assignedDoctorId">
+                            <option value="">Decide later</option>
+                            @foreach (var doctor in Model.AssignableDoctors)
+                            {
+                                <option value="@doctor.Id" disabled="@(!doctor.IsAcceptingReferrals)">
+                                    @doctor.FullName — @ReferralDisplay.AvailabilityLabel(doctor.Availability)
+                                </option>
+                            }
+                        </select>
+                        <label class="filter-label" for="acceptNotes">Notes to the referring facility</label>
+                        <textarea class="rhc-textarea" id="acceptNotes" name="notes"
+                                  placeholder="Bed reserved, bring the referral packet"></textarea>
+                        <button type="submit" class="rhc-btn rhc-btn-primary rhc-btn-block">
+                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Accept referral
+                        </button>
+                    </form>
+
+                    <form class="action-form" method="post" asp-action="Reject" asp-route-id="@referral.Id"
+                          data-confirm="Reject this referral? The referring facility will be notified.">
+                        @Html.AntiForgeryToken()
+                        <label class="filter-label" for="rejectReason">Reason for rejection</label>
+                        <textarea class="rhc-textarea" id="rejectReason" name="reason" required
+                                  placeholder="No available bed; route to the provincial hospital"></textarea>
+                        <button type="submit" class="rhc-btn rhc-btn-block">
+                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Reject referral
+                        </button>
+                    </form>
+
+                    <form class="action-form" method="post" asp-action="RequestInformation" asp-route-id="@referral.Id">
+                        @Html.AntiForgeryToken()
+                        <label class="filter-label" for="infoQuestion">Request more information</label>
+                        <textarea class="rhc-textarea" id="infoQuestion" name="question" required
+                                  placeholder="Please send the latest laboratory results"></textarea>
+                        <button type="submit" class="rhc-btn rhc-btn-block">
+                            <i class="fa-solid fa-circle-question" aria-hidden="true"></i> Request information
+                        </button>
+                    </form>
+                }
+
+                @if (Model.CanComplete)
+                {
+                    <form class="action-form" method="post" asp-action="Complete" asp-route-id="@referral.Id">
+                        @Html.AntiForgeryToken()
+                        <label class="filter-label" for="completeNotes">Completion notes</label>
+                        <textarea class="rhc-textarea" id="completeNotes" name="notes"
+                                  placeholder="Patient seen and discharged"></textarea>
+                        <button type="submit" class="rhc-btn rhc-btn-primary rhc-btn-block">
+                            <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Mark completed
+                        </button>
+                    </form>
+                }
+
+                @if (Model.CanCancel)
+                {
+                    <form class="action-form" method="post" asp-action="Cancel" asp-route-id="@referral.Id"
+                          data-confirm="Cancel this referral? This cannot be undone.">
+                        @Html.AntiForgeryToken()
+                        <label class="filter-label" for="cancelReason">Reason for cancellation</label>
+                        <input class="rhc-input" id="cancelReason" name="reason"
+                               placeholder="Patient transferred privately" />
+                        <button type="submit" class="rhc-btn rhc-btn-block">
+                            <i class="fa-solid fa-ban" aria-hidden="true"></i> Cancel referral
+                        </button>
+                    </form>
+                }
+            </section>
+        }
+    </div>
+</div>

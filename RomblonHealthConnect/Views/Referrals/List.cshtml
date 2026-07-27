@@ -1,0 +1,33 @@
+@model ReferralListViewModel
+
+@* Shared view for the Incoming, Outgoing, Pending, Completed, and Archive queues. *@
+
+@{
+    var action = Model.Scope.ToString();
+}
+
+<partial name="_StatusMessages" />
+
+<div class="page-toolbar">
+    <a class="rhc-btn rhc-btn-primary" asp-action="Create">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> New Referral
+    </a>
+    <a class="rhc-btn" asp-action="Index">
+        <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Referral dashboard
+    </a>
+</div>
+
+<partial name="_FilterBar"
+         model="@(new FilterPanelModel(Model.Filter, Model.Hospitals, Model.Municipalities, action))" />
+
+<section class="rhc-card section-spaced" aria-labelledby="queue-heading">
+    <div class="rhc-card-header">
+        <div class="rhc-card-heading">
+            <h2 class="rhc-card-title" id="queue-heading">@Model.Title</h2>
+            <p class="rhc-card-subtitle">@Model.Referrals.TotalCount referral(s) in this queue</p>
+        </div>
+    </div>
+    <div class="rhc-card-body rhc-card-body-flush">
+        <partial name="_ReferralTable" model="Model.Referrals" />
+    </div>
+</section>

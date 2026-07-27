@@ -1,0 +1,101 @@
+@model ReferralDashboardViewModel
+
+@* Referral dashboard: metric cards, filters, and the full referral table. *@
+
+<partial name="_StatusMessages" />
+
+<div class="page-toolbar">
+    <a class="rhc-btn rhc-btn-primary" asp-action="Create">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> New Referral
+    </a>
+    <a class="rhc-btn" asp-action="Incoming">
+        <i class="fa-solid fa-inbox" aria-hidden="true"></i> Incoming
+        <span class="rhc-badge rhc-badge-neutral">@Model.IncomingCount</span>
+    </a>
+    <a class="rhc-btn" asp-action="Outgoing">
+        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Outgoing
+        <span class="rhc-badge rhc-badge-neutral">@Model.OutgoingCount</span>
+    </a>
+
+    <span class="page-toolbar-spacer"></span>
+
+    <a class="rhc-btn" asp-controller="Home" asp-action="Index">
+        <i class="fa-regular fa-map" aria-hidden="true"></i> Network map
+    </a>
+</div>
+
+<section aria-labelledby="referral-metrics-heading" data-referral-metrics>
+    <h2 class="rhc-visually-hidden" id="referral-metrics-heading">Referral summary</h2>
+
+    <div class="referral-metrics">
+        <article class="metric-card">
+            <span class="metric-icon metric-icon-primary" aria-hidden="true">
+                <i class="fa-regular fa-calendar-check"></i>
+            </span>
+            <div class="metric-content">
+                <span class="metric-label">Today's Referrals</span>
+                <span class="metric-value-row"><span class="metric-value">@Model.TodayCount</span></span>
+                <span class="metric-caption">Created in the last 24 hours</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-icon metric-icon-info" aria-hidden="true">
+                <i class="fa-regular fa-hourglass-half"></i>
+            </span>
+            <div class="metric-content">
+                <span class="metric-label">Pending</span>
+                <span class="metric-value-row"><span class="metric-value">@Model.PendingCount</span></span>
+                <span class="metric-caption">Awaiting a response</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-icon metric-icon-success" aria-hidden="true">
+                <i class="fa-regular fa-circle-check"></i>
+            </span>
+            <div class="metric-content">
+                <span class="metric-label">Accepted</span>
+                <span class="metric-value-row"><span class="metric-value">@Model.AcceptedCount</span></span>
+                <span class="metric-caption">Confirmed by the destination</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-icon metric-icon-accent" aria-hidden="true">
+                <i class="fa-regular fa-circle-xmark"></i>
+            </span>
+            <div class="metric-content">
+                <span class="metric-label">Rejected</span>
+                <span class="metric-value-row"><span class="metric-value">@Model.RejectedCount</span></span>
+                <span class="metric-caption">Declined by the destination</span>
+            </div>
+        </article>
+
+        <article class="metric-card">
+            <span class="metric-icon metric-icon-info" aria-hidden="true">
+                <i class="fa-solid fa-flag-checkered"></i>
+            </span>
+            <div class="metric-content">
+                <span class="metric-label">Completed</span>
+                <span class="metric-value-row"><span class="metric-value">@Model.CompletedCount</span></span>
+                <span class="metric-caption">Patient seen and closed</span>
+            </div>
+        </article>
+    </div>
+</section>
+
+<partial name="_FilterBar"
+         model="@(new FilterPanelModel(Model.Filter, Model.Hospitals, Model.Municipalities, "Index"))" />
+
+<section class="rhc-card section-spaced" aria-labelledby="referral-table-heading">
+    <div class="rhc-card-header">
+        <div class="rhc-card-heading">
+            <h2 class="rhc-card-title" id="referral-table-heading">All Referrals</h2>
+            <p class="rhc-card-subtitle">@Model.Referrals.TotalCount referral(s) across the provincial network</p>
+        </div>
+    </div>
+    <div class="rhc-card-body rhc-card-body-flush">
+        <partial name="_ReferralTable" model="Model.Referrals" />
+    </div>
+</section>

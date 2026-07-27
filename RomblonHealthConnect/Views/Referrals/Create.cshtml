@@ -1,0 +1,290 @@
+@model CreateReferralPageViewModel
+@using System.Text.Json
+
+@* Seven-step create-referral wizard. Step state is client-side; the whole
+   form posts once from step 7. *@
+
+@{
+    var wizardPayload = JsonSerializer.Serialize(new
+    {
+        hospitals = Model.Hospitals,
+        patients = Model.Patients,
+        specializations = Model.Specializations,
+        defaultOriginHospitalId = Model.DefaultOriginHospitalId,
+        maxFileSizeBytes = Model.MaxFileSizeBytes,
+        allowedExtensions = Model.AllowedExtensions
+    }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+    var steps = new[]
+    {
+        (Number: 1, Label: "Patient"),
+        (Number: 2, Label: "Origin Hospital"),
+        (Number: 3, Label: "Destination"),
+        (Number: 4, Label: "Doctor"),
+        (Number: 5, Label: "Attachments"),
+        (Number: 6, Label: "Clinical Detail"),
+        (Number: 7, Label: "Review and Submit")
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<partial name="_StatusMessages" />
+
+<div class="rhc-alert rhc-alert-error" id="wizardError" role="alert" hidden></div>
+
+<div asp-validation-summary="ModelOnly" class="rhc-alert rhc-alert-error"></div>
+
+<form id="createReferralForm" method="post" asp-action="Create" enctype="multipart/form-data" novalidate>
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" id="PatientId" name="PatientId" value="@Model.Form.PatientId" />
+    <input type="hidden" id="OriginHospitalId" name="OriginHospitalId" value="@Model.Form.OriginHospitalId" />
+    <input type="hidden" id="DestinationHospitalId" name="DestinationHospitalId" value="@Model.Form.DestinationHospitalId" />
+    <input type="hidden" id="AssignedDoctorId" name="AssignedDoctorId" value="@Model.Form.AssignedDoctorId" />
+    <input type="hidden" id="SaveAsDraft" name="SaveAsDraft" value="false" />
+
+    <div class="wizard-layout">
+
+        <!-- Step rail -->
+        <nav class="rhc-card" aria-label="Referral steps">
+            <ol class="wizard-steps">
+                @foreach (var step in steps)
+                {
+                    <li>
+                        <button type="button" class="wizard-step" data-step="@step.Number">
+                            <span class="wizard-step-number" aria-hidden="true">@step.Number</span>
+                            <span>@step.Label</span>
+                        </button>
+                    </li>
+                }
+            </ol>
+        </nav>
+
+        <!-- Panels -->
+        <div class="rhc-card">
+
+            <!-- Step 1 — Patient -->
+            <section class="wizard-panel rhc-card-body" data-step="1" aria-labelledby="step1-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step1-title">Select the patient</h2>
+                    <p class="wizard-panel-hint">Search by name, patient number, or municipality.</p>
+                </div>
+
+                <div class="filter-field">
+                    <label class="filter-label" for="patientSearch">Search patients</label>
+                    <input class="rhc-input" id="patientSearch" type="search"
+                           placeholder="Name, patient number, or municipality" autocomplete="off" />
+                </div>
+
+                <ul class="option-list section-spaced" id="patientList"></ul>
+
+                <div class="review-block section-spaced" id="patientSummary" hidden></div>
+                @* Keys match the unprefixed model binding of the CreateReferralViewModel parameter. *@
+                @Html.ValidationMessage("PatientId", new { @class = "rhc-field-error" })
+            </section>
+
+            <!-- Step 2 — Origin hospital -->
+            <section class="wizard-panel rhc-card-body" data-step="2" aria-labelledby="step2-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step2-title">Referring facility</h2>
+                    <p class="wizard-panel-hint">Where the patient is being seen now.</p>
+                </div>
+
+                <ul class="option-list" id="originList"></ul>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" for="ReferringDoctorId">Referring doctor (optional)</label>
+                    <select class="rhc-select" id="ReferringDoctorId" name="ReferringDoctorId">
+                        <option value="">Not specified</option>
+                    </select>
+                </div>
+                @Html.ValidationMessage("OriginHospitalId", new { @class = "rhc-field-error" })
+            </section>
+
+            <!-- Step 3 — Destination hospital -->
+            <section class="wizard-panel rhc-card-body" data-step="3" aria-labelledby="step3-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step3-title">Destination facility</h2>
+                    <p class="wizard-panel-hint">
+                        Choosing a facility centres the provincial map and loads its current capability.
+                    </p>
+                </div>
+
+                <div class="filter-field">
+                    <label class="filter-label" for="RequestedSpecializationId">Specialty required</label>
+                    <select class="rhc-select" id="RequestedSpecializationId" name="RequestedSpecializationId">
+                        <option value="">Select a specialty</option>
+                        @foreach (var specialization in Model.Specializations)
+                        {
+                            <option value="@specialization.Value"
+                                    selected="@(Model.Form.RequestedSpecializationId == specialization.Value)">
+                                @specialization.Label
+                            </option>
+                        }
+                    </select>
+                    @Html.ValidationMessage("RequestedSpecializationId", new { @class = "rhc-field-error" })
+                </div>
+
+                <div class="capability-grid section-spaced">
+                    <div>
+                        <p class="capability-section-label">Facilities</p>
+                        <ul class="option-list" id="destinationList"></ul>
+                    </div>
+
+                    <div>
+                        <p class="capability-section-label">Location</p>
+                        <div class="wizard-map-shell">
+                            <div class="map-canvas" id="healthMap" role="application"
+                                 aria-label="Map of facilities in Romblon province"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rhc-card section-spaced" id="capabilityCard" aria-live="polite">
+                    <div class="empty-state">
+                        <i class="fa-regular fa-hospital empty-state-icon" aria-hidden="true"></i>
+                        <p class="empty-state-title">No facility selected</p>
+                        <p>Pick a destination to see its specialists, doctors, and bed availability.</p>
+                    </div>
+                </div>
+                @Html.ValidationMessage("DestinationHospitalId", new { @class = "rhc-field-error" })
+            </section>
+
+            <!-- Step 4 — Doctor -->
+            <section class="wizard-panel rhc-card-body" data-step="4" aria-labelledby="step4-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step4-title">Preferred doctor</h2>
+                    <p class="wizard-panel-hint">
+                        Optional. The receiving facility can assign a different clinician on acceptance.
+                    </p>
+                </div>
+
+                <ul class="option-list" id="doctorList">
+                    <li class="empty-state">
+                        <i class="fa-solid fa-user-doctor empty-state-icon" aria-hidden="true"></i>
+                        <span class="empty-state-title">Select a destination first</span>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Step 5 — Attachments -->
+            <section class="wizard-panel rhc-card-body" data-step="5" aria-labelledby="step5-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step5-title">Attachments</h2>
+                    <p class="wizard-panel-hint">
+                        Laboratory results, imaging, and supporting documents.
+                        PDF, JPEG, PNG, or DOCX up to @(Model.MaxFileSizeBytes / (1024 * 1024)) MB each.
+                    </p>
+                </div>
+
+                <div class="filter-field">
+                    <label class="filter-label" for="attachmentCategory">Category for the next upload</label>
+                    <select class="rhc-select" id="attachmentCategory">
+                        <option value="Laboratory">Laboratory</option>
+                        <option value="Imaging">Imaging</option>
+                        <option value="Document" selected>Document</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="dropzone section-spaced" id="attachmentDropzone" role="button" tabindex="0"
+                     aria-label="Add attachments">
+                    <i class="fa-solid fa-cloud-arrow-up dropzone-icon" aria-hidden="true"></i>
+                    <span>Drop files here, or select to browse</span>
+                    <span class="dropzone-hint">@string.Join(", ", Model.AllowedExtensions)</span>
+                </div>
+
+                <input class="rhc-visually-hidden" id="attachmentInput" name="Attachments" type="file" multiple
+                       accept=".pdf,.jpg,.jpeg,.png,.docx" />
+                <div id="attachmentCategories"></div>
+
+                <div class="attachment-list" id="attachmentList"></div>
+            </section>
+
+            <!-- Step 6 — Clinical detail -->
+            <section class="wizard-panel rhc-card-body" data-step="6" aria-labelledby="step6-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step6-title">Clinical detail</h2>
+                    <p class="wizard-panel-hint">Give the receiving team what they need to triage the transfer.</p>
+                </div>
+
+                <div class="filter-field">
+                    <label class="filter-label" for="Priority">Priority</label>
+                    <select class="rhc-select" id="Priority" name="Priority">
+                        @foreach (var priority in Enum.GetValues<ReferralPriority>())
+                        {
+                            <option value="@((int)priority)" selected="@(Model.Form.Priority == priority)">
+                                @priority
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" for="ReasonForReferral">Reason for referral</label>
+                    <textarea class="rhc-textarea" id="ReasonForReferral" name="ReasonForReferral"
+                              placeholder="Why is this transfer needed?">@Model.Form.ReasonForReferral</textarea>
+                    @Html.ValidationMessage("ReasonForReferral", new { @class = "rhc-field-error" })
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" for="Diagnosis">Working diagnosis (optional)</label>
+                    <input class="rhc-input" id="Diagnosis" name="Diagnosis" value="@Model.Form.Diagnosis" />
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" for="ClinicalNotes">Clinical notes (optional)</label>
+                    <textarea class="rhc-textarea" id="ClinicalNotes" name="ClinicalNotes"
+                              placeholder="Vitals, treatment given, relevant history">@Model.Form.ClinicalNotes</textarea>
+                </div>
+            </section>
+
+            <!-- Step 7 — Review -->
+            <section class="wizard-panel rhc-card-body" data-step="7" aria-labelledby="step7-title">
+                <div class="wizard-panel-header">
+                    <h2 class="wizard-panel-title" id="step7-title">Review and submit</h2>
+                    <p class="wizard-panel-hint">
+                        Confirm the details below. Sending notifies the receiving facility immediately.
+                    </p>
+                </div>
+
+                <div class="review-grid" id="reviewContent"></div>
+            </section>
+
+            <!-- Footer -->
+            <div class="wizard-footer">
+                <button type="button" class="rhc-btn" id="wizardBack">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Back
+                </button>
+                <span class="wizard-progress" id="wizardProgress" aria-live="polite">Step 1 of 7</span>
+
+                <span class="wizard-footer-spacer"></span>
+
+                <button type="button" class="rhc-btn rhc-btn-primary" id="wizardNext">
+                    Next <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                </button>
+
+                <span id="wizardSubmitGroup" hidden>
+                    <button type="submit" class="rhc-btn" id="saveDraftButton">Save as draft</button>
+                    <button type="submit" class="rhc-btn rhc-btn-primary">
+                        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send Referral
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+</form>
+
+@* Reference data for the wizard, read once by referral-wizard.js. *@
+<script type="application/json" id="wizardData">@Html.Raw(wizardPayload)</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin="anonymous"></script>
+    <script src="~/js/referral-wizard.js" asp-append-version="true"></script>
+    <script src="~/js/health-map.js" asp-append-version="true"></script>
+}

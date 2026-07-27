@@ -15,6 +15,7 @@
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/referrals.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -69,14 +70,68 @@
                     </li>
                 </ul>
 
-                <p class="sidebar-section-label">Operations</p>
+                <p class="sidebar-section-label">Referrals</p>
                 <ul class="sidebar-nav-list">
                     <li>
-                        <a class="sidebar-link @(activeNav == "referrals" ? "is-active" : "")" href="#">
+                        <a class="sidebar-link @(activeNav == "referrals-dashboard" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Index"
+                           aria-current="@(activeNav == "referrals-dashboard" ? "page" : null)">
                             <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-share-from-square"></i></span>
-                            <span class="sidebar-link-label">Referrals</span>
+                            <span class="sidebar-link-label">Dashboard</span>
                         </a>
                     </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-create" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Create"
+                           aria-current="@(activeNav == "referrals-create" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+                            <span class="sidebar-link-label">Create Referral</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-incoming" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Incoming"
+                           aria-current="@(activeNav == "referrals-incoming" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-solid fa-inbox"></i></span>
+                            <span class="sidebar-link-label">Incoming</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-outgoing" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Outgoing"
+                           aria-current="@(activeNav == "referrals-outgoing" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+                            <span class="sidebar-link-label">Outgoing</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-pending" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Pending"
+                           aria-current="@(activeNav == "referrals-pending" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-hourglass-half"></i></span>
+                            <span class="sidebar-link-label">Pending</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-completed" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Completed"
+                           aria-current="@(activeNav == "referrals-completed" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-circle-check"></i></span>
+                            <span class="sidebar-link-label">Completed</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals-archive" ? "is-active" : "")"
+                           asp-controller="Referrals" asp-action="Archive"
+                           aria-current="@(activeNav == "referrals-archive" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-folder-open"></i></span>
+                            <span class="sidebar-link-label">Archive</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="sidebar-section-label">Operations</p>
+                <ul class="sidebar-nav-list">
                     <li>
                         <a class="sidebar-link @(activeNav == "schedules" ? "is-active" : "")" href="#">
                             <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-calendar"></i></span>
@@ -144,9 +199,10 @@
                         <span id="currentDate">&mdash;</span>
                     </span>
 
-                    <button type="button" class="rhc-icon-btn" id="notificationsButton" aria-label="Notifications, 3 unread">
+                    <button type="button" class="rhc-icon-btn" id="notificationsButton"
+                            aria-controls="notificationPanel" aria-expanded="false" aria-label="Notifications">
                         <i class="fa-regular fa-bell" aria-hidden="true"></i>
-                        <span class="rhc-badge-dot" aria-hidden="true">3</span>
+                        <span class="rhc-badge-dot" id="notificationBadge" aria-hidden="true" hidden></span>
                     </button>
 
                     <button type="button" class="topbar-profile" id="profileButton" aria-label="Account menu for Dr. J. Molino">
@@ -163,11 +219,29 @@
                 @RenderBody()
             </main>
         </div>
+
+        <!-- Notification centre, populated by referrals.js -->
+        <aside class="notification-panel" id="notificationPanel" aria-label="Notifications">
+            <header class="notification-header">
+                <h2 class="notification-title">Notifications</h2>
+                <button type="button" class="rhc-btn rhc-btn-subtle" id="markAllRead">Mark all read</button>
+            </header>
+            <ul class="notification-list rhc-scroll" id="notificationList">
+                <li class="empty-state"><span class="empty-state-title">Loading…</span></li>
+            </ul>
+        </aside>
     </div>
+
+    @* Supplies the anti-forgery token to fetch-based POSTs in referrals.js. *@
+    <form id="antiForgeryForm" aria-hidden="true" class="rhc-visually-hidden">@Html.AntiForgeryToken()</form>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/referrals.js" asp-append-version="true"></script>
+    <script src="~/js/referral-realtime.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

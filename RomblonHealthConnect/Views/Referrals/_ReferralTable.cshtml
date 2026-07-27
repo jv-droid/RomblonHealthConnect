@@ -1,0 +1,105 @@
+@model PagedResult<ReferralListItemViewModel>
+
+<div class="rhc-table-wrap rhc-scroll">
+    <table class="rhc-table referral-table">
+        <caption class="rhc-visually-hidden">
+            Referrals with patient, origin, destination, requested specialist, status, priority, and date
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Referral #</th>
+                <th scope="col">Patient</th>
+                <th scope="col">Origin</th>
+                <th scope="col">Destination</th>
+                <th scope="col">Requested Specialist</th>
+                <th scope="col">Status</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Date</th>
+                <th scope="col"><span class="rhc-visually-hidden">Actions</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.TotalCount == 0)
+            {
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="fa-regular fa-folder-open empty-state-icon" aria-hidden="true"></i>
+                            <p class="empty-state-title">No referrals found</p>
+                            <p>Adjust the filters, or create a new referral to get started.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var referral in Model.Items)
+                {
+                    <tr data-referral-id="@referral.Id" data-priority="@referral.Priority">
+                        <td>
+                            <a class="referral-number" asp-action="Details" asp-route-id="@referral.Id">
+                                @referral.ReferralNumber
+                            </a>
+                        </td>
+                        <td>
+                            <span class="cell-stack">
+                                <span class="cell-strong">@referral.PatientName</span>
+                                <span class="cell-stack-sub">@referral.PatientNumber</span>
+                            </span>
+                        </td>
+                        <td class="cell-muted">@referral.OriginHospital</td>
+                        <td class="cell-strong">@referral.DestinationHospital</td>
+                        <td>
+                            <span class="cell-stack">
+                                <span>@referral.RequestedSpecialist</span>
+                                @if (!string.IsNullOrEmpty(referral.AssignedDoctor))
+                                {
+                                    <span class="cell-stack-sub">@referral.AssignedDoctor</span>
+                                }
+                            </span>
+                        </td>
+                        <td data-cell="status">
+                            <span class="rhc-badge @ReferralDisplay.StatusBadgeClass(referral.Status)">
+                                @ReferralDisplay.StatusLabel(referral.Status)
+                            </span>
+                        </td>
+                        <td>
+                            <span class="rhc-badge @ReferralDisplay.PriorityBadgeClass(referral.Priority)">
+                                @ReferralDisplay.PriorityLabel(referral.Priority)
+                            </span>
+                        </td>
+                        <td class="cell-muted">@referral.CreatedUtc.ToLocalTime().ToString("dd MMM, HH:mm")</td>
+                        <td>
+                            <div class="row-actions">
+                                <a class="rhc-btn rhc-btn-subtle" asp-action="Details" asp-route-id="@referral.Id"
+                                   aria-label="Open @referral.ReferralNumber">
+                                    Open
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="rhc-pagination">
+        <span class="rhc-pagination-summary">
+            Showing @Model.FirstItemNumber–@Model.LastItemNumber of @Model.TotalCount
+        </span>
+        <div class="rhc-pagination-controls">
+            <a class="rhc-btn" aria-disabled="@(!Model.HasPrevious)"
+               href="@Url.Action(null, new { page = Model.Page - 1 })">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Previous
+            </a>
+            <span class="rhc-pagination-summary">Page @Model.Page of @Model.TotalPages</span>
+            <a class="rhc-btn" aria-disabled="@(!Model.HasNext)"
+               href="@Url.Action(null, new { page = Model.Page + 1 })">
+                Next <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+}

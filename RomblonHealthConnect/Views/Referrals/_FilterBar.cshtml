@@ -1,0 +1,96 @@
+@model FilterPanelModel
+@using RomblonHealthConnect.Models.Enums
+
+@{
+    var filter = Model.Filter;
+}
+
+<section class="rhc-card" aria-label="Filter referrals">
+    <form class="filter-bar" id="referralFilters" method="get"
+          asp-controller="Referrals" asp-action="@Model.Action">
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterSearch">Search</label>
+            <input class="rhc-input" id="filterSearch" type="search" name="SearchTerm"
+                   value="@filter.SearchTerm" placeholder="Referral, patient, hospital, doctor"
+                   autocomplete="off" />
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterStatus">Status</label>
+            <select class="rhc-select" id="filterStatus" name="Status">
+                <option value="">All statuses</option>
+                @foreach (var status in Enum.GetValues<ReferralStatus>())
+                {
+                    <option value="@((int)status)" selected="@(filter.Status == status)">
+                        @ReferralDisplay.StatusLabel(status)
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterPriority">Priority</label>
+            <select class="rhc-select" id="filterPriority" name="Priority">
+                <option value="">All priorities</option>
+                @foreach (var priority in Enum.GetValues<ReferralPriority>())
+                {
+                    <option value="@((int)priority)" selected="@(filter.Priority == priority)">
+                        @priority
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterHospital">Hospital</label>
+            <select class="rhc-select" id="filterHospital" name="HospitalId">
+                <option value="">All facilities</option>
+                @foreach (var hospital in Model.Hospitals)
+                {
+                    <option value="@hospital.Value" selected="@(filter.HospitalId == hospital.Value)">
+                        @hospital.Label
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterMunicipality">Municipality</label>
+            <select class="rhc-select" id="filterMunicipality" name="Municipality">
+                <option value="">All municipalities</option>
+                @foreach (var municipality in Model.Municipalities)
+                {
+                    <option value="@municipality" selected="@(filter.Municipality == municipality)">
+                        @municipality
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterFrom">From</label>
+            <input class="rhc-input" id="filterFrom" type="date" name="DateFrom"
+                   value="@(filter.DateFrom?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div class="filter-field">
+            <label class="filter-label" for="filterTo">To</label>
+            <input class="rhc-input" id="filterTo" type="date" name="DateTo"
+                   value="@(filter.DateTo?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div class="filter-field">
+            <span class="filter-label" aria-hidden="true">&nbsp;</span>
+            <div class="filter-actions">
+                <button type="submit" class="rhc-btn rhc-btn-primary">
+                    <i class="fa-solid fa-filter" aria-hidden="true"></i> Apply
+                </button>
+                @if (filter.HasActiveFilters)
+                {
+                    <button type="button" class="rhc-btn" id="resetFilters">Reset</button>
+                }
+            </div>
+        </div>
+    </form>
+</section>
