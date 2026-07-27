@@ -1,0 +1,966 @@
+/* ==========================================================================
+   Romblon HealthConnect — Dashboard components
+   Depends on the tokens declared in site.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Shared card shell
+   -------------------------------------------------------------------------- */
+.rhc-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-1);
+}
+
+.rhc-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    padding: var(--rhc-space-2) var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-divider);
+}
+
+.rhc-card-heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.rhc-card-title {
+    font-size: var(--rhc-text-md);
+    font-weight: 600;
+}
+
+.rhc-card-subtitle {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.rhc-card-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    margin-left: auto;
+}
+
+.rhc-card-body {
+    padding: var(--rhc-space-2);
+}
+
+.rhc-card-body-flush {
+    padding: 0;
+}
+
+.rhc-card-footer {
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    border-top: 1px solid var(--rhc-divider);
+}
+
+/* --------------------------------------------------------------------------
+   2. Prototype notice
+   -------------------------------------------------------------------------- */
+.rhc-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-3);
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-warning-subtle);
+    border: 1px solid #F7E3BE;
+    border-radius: var(--rhc-radius-md);
+}
+
+.rhc-notice-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--rhc-warning);
+}
+
+.rhc-notice strong {
+    color: var(--rhc-text);
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   3. Metric cards
+   -------------------------------------------------------------------------- */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+    margin-bottom: var(--rhc-space-3);
+}
+
+.metric-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-2);
+    padding: var(--rhc-space-2);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-1);
+    transition: border-color var(--rhc-duration) var(--rhc-ease), box-shadow var(--rhc-duration) var(--rhc-ease);
+}
+
+.metric-card:hover {
+    border-color: var(--rhc-border-strong);
+    box-shadow: var(--rhc-shadow-2);
+}
+
+.metric-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    font-size: var(--rhc-text-md);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.metric-icon-primary {
+    color: var(--rhc-primary);
+    background: var(--rhc-primary-subtle);
+}
+
+.metric-icon-success {
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+}
+
+.metric-icon-info {
+    color: var(--rhc-info);
+    background: var(--rhc-info-subtle);
+}
+
+.metric-icon-accent {
+    color: var(--rhc-type-district);
+    background: #F3EFF9;
+}
+
+.metric-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.metric-label {
+    font-size: var(--rhc-text-sm);
+    font-weight: 500;
+    color: var(--rhc-text-secondary);
+}
+
+.metric-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-1);
+}
+
+.metric-value {
+    font-size: var(--rhc-text-2xl);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+
+.metric-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+}
+
+.metric-trend-up {
+    color: var(--rhc-success);
+}
+
+.metric-trend-down {
+    color: var(--rhc-danger);
+}
+
+.metric-trend-flat {
+    color: var(--rhc-text-tertiary);
+}
+
+.metric-caption {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   4. Main dashboard layout
+   -------------------------------------------------------------------------- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--rhc-space-2);
+    margin-bottom: var(--rhc-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   5. Map card
+   -------------------------------------------------------------------------- */
+.map-card {
+    min-width: 0;
+}
+
+.map-shell {
+    position: relative;
+    height: 520px;
+    border-radius: 0 0 var(--rhc-radius-lg) var(--rhc-radius-lg);
+    overflow: hidden;
+}
+
+.map-canvas {
+    position: absolute;
+    inset: 0;
+}
+
+/* MapLibre control chrome, restyled to match the Fluent surface. */
+.map-shell .maplibregl-ctrl-group {
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-sm);
+    box-shadow: var(--rhc-shadow-2);
+}
+
+.map-shell .maplibregl-ctrl-group button + button {
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.map-shell .maplibregl-ctrl-attrib {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: var(--rhc-radius-sm) 0 0 0;
+}
+
+.map-shell .maplibregl-ctrl-attrib a {
+    color: var(--rhc-text-secondary);
+}
+
+/* Facility markers — flat pins, no glow. */
+.map-marker {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-type-public);
+    border: 2px solid var(--rhc-surface);
+    border-radius: 50%;
+    box-shadow: var(--rhc-shadow-2);
+    cursor: pointer;
+    transition: transform var(--rhc-duration) var(--rhc-ease);
+}
+
+.map-marker:hover {
+    transform: scale(1.15);
+}
+
+.map-marker:focus-visible {
+    outline: 2px solid var(--rhc-primary);
+    outline-offset: 2px;
+}
+
+.map-marker.is-selected {
+    transform: scale(1.25);
+    border-color: var(--rhc-primary);
+    box-shadow: var(--rhc-shadow-3);
+}
+
+.map-marker-public {
+    background: var(--rhc-type-public);
+}
+
+.map-marker-district {
+    background: var(--rhc-type-district);
+}
+
+.map-marker-rhu {
+    background: var(--rhc-type-rhu);
+}
+
+.map-marker-private {
+    background: var(--rhc-type-private);
+}
+
+/* Shown in place of the canvas when MapLibre cannot be reached. */
+.map-unavailable {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: var(--rhc-space-3);
+    text-align: center;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-surface-alt);
+}
+
+/* Legend overlay */
+.map-legend {
+    position: absolute;
+    left: var(--rhc-space-2);
+    bottom: var(--rhc-space-2);
+    z-index: 2;
+    min-width: 168px;
+    padding: var(--rhc-space-1) var(--rhc-space-2) var(--rhc-space-2);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-2);
+    backdrop-filter: blur(2px);
+}
+
+.map-legend-title {
+    margin-bottom: var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.map-legend-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-half);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.map-legend-swatch {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.map-legend-swatch-public {
+    background: var(--rhc-type-public);
+}
+
+.map-legend-swatch-district {
+    background: var(--rhc-type-district);
+}
+
+.map-legend-swatch-rhu {
+    background: var(--rhc-type-rhu);
+}
+
+.map-legend-swatch-private {
+    background: var(--rhc-type-private);
+}
+
+/* --------------------------------------------------------------------------
+   6. Right overview panel
+   -------------------------------------------------------------------------- */
+.overview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rhc-space-2);
+    min-width: 0;
+}
+
+.overview-section + .overview-section {
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.overview-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-2) var(--rhc-space-2) var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.stat-list {
+    margin: 0;
+    padding: 0 var(--rhc-space-2) var(--rhc-space-2);
+    list-style: none;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-1) 0;
+    font-size: var(--rhc-text-base);
+}
+
+.stat-row + .stat-row {
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.stat-row-label {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    color: var(--rhc-text-secondary);
+}
+
+.stat-row-value {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--rhc-text);
+    white-space: nowrap;
+}
+
+.stat-row-value-muted {
+    font-weight: 400;
+    color: var(--rhc-text-secondary);
+}
+
+/* Small colour key used in the availability list. */
+.stat-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.stat-dot-success {
+    background: var(--rhc-success);
+}
+
+.stat-dot-warning {
+    background: var(--rhc-warning);
+}
+
+.stat-dot-danger {
+    background: var(--rhc-danger);
+}
+
+.stat-dot-neutral {
+    background: var(--rhc-text-tertiary);
+}
+
+/* Pulsing presence indicator for the network status row. */
+.status-live {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    font-weight: 600;
+    color: var(--rhc-success);
+}
+
+.status-live-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    background: var(--rhc-success);
+    border-radius: 50%;
+}
+
+.status-live-dot::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 1px solid var(--rhc-success);
+    border-radius: 50%;
+    opacity: 0.4;
+}
+
+/* --------------------------------------------------------------------------
+   7. Status badges
+   -------------------------------------------------------------------------- */
+.rhc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    padding: 2px var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    line-height: 16px;
+    white-space: nowrap;
+    border-radius: var(--rhc-radius-sm);
+}
+
+.rhc-badge-success {
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+}
+
+.rhc-badge-warning {
+    color: #8A5A00;
+    background: var(--rhc-warning-subtle);
+}
+
+.rhc-badge-danger {
+    color: var(--rhc-danger);
+    background: var(--rhc-danger-subtle);
+}
+
+.rhc-badge-info {
+    color: var(--rhc-info);
+    background: var(--rhc-info-subtle);
+}
+
+.rhc-badge-neutral {
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   8. Bottom section — tables
+   -------------------------------------------------------------------------- */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+}
+
+.rhc-table-wrap {
+    overflow-x: auto;
+}
+
+.rhc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--rhc-text-base);
+}
+
+.rhc-table th,
+.rhc-table td {
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.rhc-table thead th {
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+    background: var(--rhc-surface-alt);
+    border-bottom: 1px solid var(--rhc-border);
+}
+
+.rhc-table tbody tr {
+    border-bottom: 1px solid var(--rhc-divider);
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.rhc-table tbody tr:hover {
+    background: var(--rhc-surface-alt);
+}
+
+.rhc-table td {
+    color: var(--rhc-text);
+}
+
+.cell-strong {
+    font-weight: 600;
+}
+
+.cell-muted {
+    color: var(--rhc-text-secondary);
+}
+
+.cell-mono {
+    font-family: var(--rhc-font-mono);
+    font-size: var(--rhc-text-sm);
+}
+
+/* Two-line cell: primary label above a secondary detail. */
+.cell-stack {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+}
+
+.cell-stack-sub {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+.cell-numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Referral origin → destination pair. */
+.route-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-sm);
+}
+
+.route-arrow {
+    color: var(--rhc-text-tertiary);
+    font-size: 10px;
+}
+
+/* Bed availability meter. */
+.bed-meter {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+}
+
+.bed-meter-track {
+    width: 44px;
+    height: 4px;
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-pill);
+    overflow: hidden;
+}
+
+.bed-meter-fill {
+    height: 100%;
+    background: var(--rhc-success);
+    border-radius: var(--rhc-radius-pill);
+}
+
+.bed-meter-fill-warning {
+    background: var(--rhc-warning);
+}
+
+.bed-meter-fill-danger {
+    background: var(--rhc-danger);
+}
+
+.bed-meter-text {
+    font-size: var(--rhc-text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--rhc-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   9. Hospital details drawer
+   -------------------------------------------------------------------------- */
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(27, 26, 25, 0.24);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--rhc-duration-slow) var(--rhc-ease), visibility var(--rhc-duration-slow);
+}
+
+.drawer-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hospital-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    width: var(--rhc-drawer-width);
+    max-width: 100vw;
+    background: var(--rhc-surface);
+    border-left: 1px solid var(--rhc-border);
+    box-shadow: var(--rhc-shadow-3);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform var(--rhc-duration-slow) var(--rhc-ease), visibility var(--rhc-duration-slow);
+}
+
+.hospital-drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+.drawer-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    padding: var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-border);
+}
+
+.drawer-header-text {
+    min-width: 0;
+}
+
+.drawer-title {
+    font-size: var(--rhc-text-lg);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.drawer-subtitle {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    margin-top: 2px;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.drawer-close {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.drawer-section {
+    padding: var(--rhc-space-2);
+}
+
+.drawer-section + .drawer-section {
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.drawer-section-label {
+    margin-bottom: var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+/* Compact label/value information rows. */
+.info-list {
+    margin: 0;
+}
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-2);
+    padding: var(--rhc-space-half) 0;
+    font-size: var(--rhc-text-base);
+}
+
+.info-row-label {
+    flex-shrink: 0;
+    width: 116px;
+    color: var(--rhc-text-secondary);
+}
+
+.info-row-value {
+    margin: 0;
+    min-width: 0;
+    font-weight: 500;
+    color: var(--rhc-text);
+}
+
+/* Availability figures shown as a small tile pair. */
+.drawer-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--rhc-space-1);
+}
+
+.drawer-stat {
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+}
+
+.drawer-stat-value {
+    font-size: var(--rhc-text-xl);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.drawer-stat-label {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-secondary);
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rhc-space-half);
+}
+
+.rhc-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-pill);
+}
+
+.drawer-footer {
+    display: flex;
+    gap: var(--rhc-space-1);
+    flex-shrink: 0;
+    padding: var(--rhc-space-2);
+    border-top: 1px solid var(--rhc-border);
+}
+
+.drawer-footer .rhc-btn {
+    flex: 1;
+}
+
+.drawer-updated {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   10. Responsive behaviour
+   -------------------------------------------------------------------------- */
+@media (max-width: 1400px) {
+    .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr) 296px;
+    }
+}
+
+/* Tablet — map goes full width, overview drops beneath it. */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .overview-panel {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--rhc-space-2);
+    }
+
+    /* Section dividers become card borders once the panel is a grid. */
+    .overview-section + .overview-section {
+        border-top: 0;
+    }
+
+    .bottom-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .bottom-grid > :last-child {
+        grid-column: span 2;
+    }
+
+    .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .map-shell {
+        height: 440px;
+    }
+}
+
+@media (max-width: 900px) {
+    .overview-panel {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bottom-grid > :last-child {
+        grid-column: span 1;
+    }
+}
+
+/* Mobile — horizontally scrollable metrics, drawer becomes a bottom sheet. */
+@media (max-width: 720px) {
+    .metric-grid {
+        display: flex;
+        gap: var(--rhc-space-1);
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        margin-left: calc(-1 * var(--rhc-space-1));
+        margin-right: calc(-1 * var(--rhc-space-1));
+        padding: 0 var(--rhc-space-1) var(--rhc-space-1);
+    }
+
+    .metric-card {
+        flex: 0 0 216px;
+        scroll-snap-align: start;
+    }
+
+    .map-shell {
+        height: 380px;
+    }
+
+    .map-legend {
+        left: var(--rhc-space-1);
+        bottom: var(--rhc-space-1);
+        min-width: 0;
+        padding: var(--rhc-space-1);
+    }
+
+    .map-legend-item {
+        font-size: var(--rhc-text-xs);
+    }
+
+    .hospital-drawer {
+        top: auto;
+        left: 0;
+        width: 100%;
+        max-height: 86vh;
+        border-left: 0;
+        border-top-left-radius: var(--rhc-radius-lg);
+        border-top-right-radius: var(--rhc-radius-lg);
+        transform: translateY(100%);
+    }
+
+    .hospital-drawer.is-open {
+        transform: translateY(0);
+    }
+
+    /* Grab handle affordance for the bottom sheet. */
+    .hospital-drawer::before {
+        content: "";
+        position: absolute;
+        top: var(--rhc-space-1);
+        left: 50%;
+        width: 32px;
+        height: 4px;
+        background: var(--rhc-border-strong);
+        border-radius: var(--rhc-radius-pill);
+        transform: translateX(-50%);
+    }
+
+    .drawer-header {
+        padding-top: var(--rhc-space-3);
+    }
+
+    .info-row-label {
+        width: 100px;
+    }
+}

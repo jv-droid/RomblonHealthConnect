@@ -1,47 +1,170 @@
-﻿<!DOCTYPE html>
+@{
+    var pageTitle = ViewData["Title"] as string ?? "Dashboard";
+    var pageSubtitle = ViewData["Subtitle"] as string;
+    var activeNav = ViewData["ActiveNav"] as string ?? "dashboard";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RomblonHealthConnect</title>
-    <script type="importmap"></script>
+    <title>@pageTitle · Romblon HealthConnect</title>
+    <meta name="description" content="Provincial hospital and referral monitoring for the Province of Romblon." />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/RomblonHealthConnect.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RomblonHealthConnect</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    <a class="rhc-skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="app-shell" id="appShell" data-sidebar="expanded" data-mobile-nav="closed">
+
+        <!-- Navigation rail -->
+        <aside class="app-sidebar" id="appSidebar">
+            <div class="sidebar-brand">
+                <span class="sidebar-brand-mark" aria-hidden="true">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </span>
+                <span class="sidebar-brand-text">
+                    <span class="sidebar-brand-name">HealthConnect</span>
+                    <span class="sidebar-brand-sub">Province of Romblon</span>
+                </span>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+            <nav class="sidebar-nav rhc-scroll" aria-label="Main navigation">
+                <ul class="sidebar-nav-list">
+                    <li>
+                        @* Razor drops the attribute entirely when the expression is null. *@
+                        <a class="sidebar-link @(activeNav == "dashboard" ? "is-active" : "")"
+                           asp-controller="Home" asp-action="Index"
+                           aria-current="@(activeNav == "dashboard" ? "page" : null)">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-object-group"></i></span>
+                            <span class="sidebar-link-label">Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="sidebar-section-label">Network</p>
+                <ul class="sidebar-nav-list">
+                    <li>
+                        <a class="sidebar-link @(activeNav == "hospitals" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-hospital"></i></span>
+                            <span class="sidebar-link-label">Hospitals</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "doctors" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-user"></i></span>
+                            <span class="sidebar-link-label">Doctors</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "specializations" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-solid fa-stethoscope"></i></span>
+                            <span class="sidebar-link-label">Specializations</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="sidebar-section-label">Operations</p>
+                <ul class="sidebar-nav-list">
+                    <li>
+                        <a class="sidebar-link @(activeNav == "referrals" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-share-from-square"></i></span>
+                            <span class="sidebar-link-label">Referrals</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "schedules" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-calendar"></i></span>
+                            <span class="sidebar-link-label">Schedules</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebar-link @(activeNav == "reports" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-regular fa-chart-bar"></i></span>
+                            <span class="sidebar-link-label">Reports</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="sidebar-section-label">System</p>
+                <ul class="sidebar-nav-list">
+                    <li>
+                        <a class="sidebar-link @(activeNav == "settings" ? "is-active" : "")" href="#">
+                            <span class="sidebar-link-icon" aria-hidden="true"><i class="fa-solid fa-gear"></i></span>
+                            <span class="sidebar-link-label">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button type="button" class="sidebar-toggle" id="sidebarToggle"
+                        aria-controls="appSidebar" aria-expanded="true">
+                    <span class="sidebar-toggle-icon" aria-hidden="true"><i class="fa-solid fa-angles-left"></i></span>
+                    <span class="sidebar-toggle-label">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- Main column -->
+        <div class="app-main">
+            <header class="app-topbar">
+                <button type="button" class="rhc-icon-btn topbar-menu-button" id="mobileNavToggle"
+                        aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation menu">
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </button>
+
+                <div class="topbar-heading">
+                    <h1 class="topbar-title">@pageTitle</h1>
+                    @if (!string.IsNullOrEmpty(pageSubtitle))
+                    {
+                        <p class="topbar-subtitle">@pageSubtitle</p>
+                    }
+                </div>
+
+                <div class="topbar-actions">
+                    <div class="rhc-search">
+                        <span class="rhc-search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <label class="rhc-visually-hidden" for="globalSearch">Search hospitals, doctors, or referrals</label>
+                        <input class="rhc-search-input" id="globalSearch" type="search"
+                               placeholder="Search" autocomplete="off" />
+                    </div>
+
+                    <span class="topbar-divider" aria-hidden="true"></span>
+
+                    <span class="topbar-date">
+                        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                        <span id="currentDate">&mdash;</span>
+                    </span>
+
+                    <button type="button" class="rhc-icon-btn" id="notificationsButton" aria-label="Notifications, 3 unread">
+                        <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                        <span class="rhc-badge-dot" aria-hidden="true">3</span>
+                    </button>
+
+                    <button type="button" class="topbar-profile" id="profileButton" aria-label="Account menu for Dr. J. Molino">
+                        <span class="rhc-avatar" aria-hidden="true">JM</span>
+                        <span class="topbar-profile-text">
+                            <span class="topbar-profile-name">J. Molino</span>
+                            <span class="topbar-profile-role">Provincial Administrator</span>
+                        </span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="app-content rhc-scroll" id="main-content">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - RomblonHealthConnect - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

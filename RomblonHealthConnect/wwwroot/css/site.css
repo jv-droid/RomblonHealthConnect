@@ -1,31 +1,832 @@
+/* ==========================================================================
+   Romblon HealthConnect — Foundation
+   Design tokens, base typography, and application shell (sidebar + topbar).
+   Component styles live in dashboard.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design tokens
+   -------------------------------------------------------------------------- */
+:root {
+    /* Surfaces */
+    --rhc-bg: #F5F7FA;
+    --rhc-surface: #FFFFFF;
+    --rhc-surface-alt: #FAFBFC;
+    --rhc-surface-hover: #F3F4F6;
+    --rhc-surface-active: #EBEDF0;
+
+    /* Brand */
+    --rhc-primary: #2563EB;
+    --rhc-primary-hover: #1D4ED8;
+    --rhc-primary-active: #1E40AF;
+    --rhc-primary-subtle: #EFF4FE;
+    --rhc-primary-subtle-hover: #E3EBFD;
+    --rhc-secondary: #0F6CBD;
+
+    /* Text */
+    --rhc-text: #1B1A19;
+    --rhc-text-secondary: #605E5C;
+    --rhc-text-tertiary: #8A8886;
+    --rhc-text-inverse: #FFFFFF;
+
+    /* Lines */
+    --rhc-border: #E5E7EB;
+    --rhc-border-strong: #D1D5DB;
+    --rhc-divider: #EDEFF2;
+
+    /* Status */
+    --rhc-success: #107C10;
+    --rhc-success-subtle: #E9F4E9;
+    --rhc-warning: #F59E0B;
+    --rhc-warning-subtle: #FEF5E7;
+    --rhc-danger: #D13438;
+    --rhc-danger-subtle: #FDECEC;
+    --rhc-info: #0F6CBD;
+    --rhc-info-subtle: #EAF3FB;
+    --rhc-neutral-subtle: #F1F2F4;
+
+    /* Facility type accents (used by map markers + legend) */
+    --rhc-type-public: #0F6CBD;
+    --rhc-type-district: #8764B8;
+    --rhc-type-rhu: #107C10;
+    --rhc-type-private: #CA5010;
+
+    /* Spacing — 8px system with 4px half-steps */
+    --rhc-space-half: 4px;
+    --rhc-space-1: 8px;
+    --rhc-space-2: 16px;
+    --rhc-space-3: 24px;
+    --rhc-space-4: 32px;
+    --rhc-space-5: 40px;
+    --rhc-space-6: 48px;
+
+    /* Radius */
+    --rhc-radius-sm: 6px;
+    --rhc-radius-md: 10px;
+    --rhc-radius-lg: 14px;
+    --rhc-radius-pill: 999px;
+
+    /* Elevation — deliberately soft */
+    --rhc-shadow-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+    --rhc-shadow-2: 0 2px 4px rgba(16, 24, 40, 0.04), 0 4px 8px rgba(16, 24, 40, 0.06);
+    --rhc-shadow-3: 0 8px 16px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.04);
+
+    /* Typography */
+    --rhc-font: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    --rhc-font-mono: "Cascadia Mono", "Consolas", "Courier New", monospace;
+
+    --rhc-text-xs: 11px;
+    --rhc-text-sm: 12px;
+    --rhc-text-base: 13px;
+    --rhc-text-md: 14px;
+    --rhc-text-lg: 16px;
+    --rhc-text-xl: 20px;
+    --rhc-text-2xl: 28px;
+
+    /* Motion — restrained */
+    --rhc-ease: cubic-bezier(0.33, 0, 0.67, 1);
+    --rhc-duration-fast: 100ms;
+    --rhc-duration: 150ms;
+    --rhc-duration-slow: 250ms;
+
+    /* Layout */
+    --rhc-sidebar-width: 248px;
+    --rhc-sidebar-width-collapsed: 56px;
+    --rhc-topbar-height: 60px;
+    --rhc-drawer-width: 384px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    font-size: 100%;
+    height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    height: 100%;
+    margin: 0;
+    font-family: var(--rhc-font);
+    font-size: var(--rhc-text-md);
+    line-height: 1.5;
+    color: var(--rhc-text);
+    background-color: var(--rhc-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--rhc-text);
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+p {
+    margin: 0;
+}
+
+a {
+    color: var(--rhc-primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Visible, consistent keyboard focus across the whole app. */
+:focus-visible {
+    outline: 2px solid var(--rhc-primary);
+    outline-offset: 2px;
+    border-radius: var(--rhc-radius-sm);
+}
+
+/* Screen-reader-only content that stays keyboard reachable. */
+.rhc-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.rhc-skip-link {
+    position: absolute;
+    top: var(--rhc-space-1);
+    left: var(--rhc-space-1);
+    z-index: 100;
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+    color: var(--rhc-text);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-sm);
+    box-shadow: var(--rhc-shadow-2);
+    transform: translateY(-200%);
+    transition: transform var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-skip-link:focus {
+    transform: translateY(0);
+    text-decoration: none;
+}
+
+/* Restrained scrollbars that match the neutral palette. */
+.rhc-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rhc-border-strong) transparent;
+}
+
+.rhc-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.rhc-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rhc-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--rhc-border-strong);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: var(--rhc-radius-pill);
+}
+
+.rhc-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--rhc-text-tertiary);
+    background-clip: content-box;
+}
+
+/* --------------------------------------------------------------------------
+   3. Application shell
+   -------------------------------------------------------------------------- */
+.app-shell {
+    display: flex;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+.app-main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-content {
+    flex: 1;
+    padding: var(--rhc-space-3);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   4. Sidebar navigation rail
+   -------------------------------------------------------------------------- */
+.app-sidebar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: var(--rhc-sidebar-width);
+    background: var(--rhc-surface);
+    border-right: 1px solid var(--rhc-border);
+    transition: width var(--rhc-duration-slow) var(--rhc-ease);
+}
+
+.app-shell[data-sidebar="collapsed"] .app-sidebar {
+    width: var(--rhc-sidebar-width-collapsed);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    height: var(--rhc-topbar-height);
+    padding: 0 var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-border);
+    overflow: hidden;
+}
+
+.sidebar-brand-mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    font-size: var(--rhc-text-md);
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.sidebar-brand-name {
+    font-size: var(--rhc-text-md);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sidebar-brand-sub {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-secondary);
+    white-space: nowrap;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--rhc-space-2) var(--rhc-space-1);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-section-label {
+    padding: var(--rhc-space-2) var(--rhc-space-1) var(--rhc-space-half);
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+    white-space: nowrap;
+}
+
+.sidebar-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    padding: var(--rhc-space-1) var(--rhc-space-1);
+    font-size: var(--rhc-text-base);
+    font-weight: 400;
+    color: var(--rhc-text);
+    border-radius: var(--rhc-radius-sm);
+    white-space: nowrap;
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.sidebar-link:hover {
+    background: var(--rhc-surface-hover);
+    text-decoration: none;
+}
+
+.sidebar-link:active {
+    background: var(--rhc-surface-active);
+}
+
+.sidebar-link-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    font-size: var(--rhc-text-md);
+    color: var(--rhc-text-secondary);
+}
+
+.sidebar-link.is-active {
+    font-weight: 600;
+    color: var(--rhc-primary);
+    background: var(--rhc-primary-subtle);
+}
+
+.sidebar-link.is-active:hover {
+    background: var(--rhc-primary-subtle-hover);
+}
+
+.sidebar-link.is-active .sidebar-link-icon {
+    color: var(--rhc-primary);
+}
+
+/* Fluent-style selection indicator on the leading edge. */
+.sidebar-link.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    background: var(--rhc-primary);
+    border-radius: var(--rhc-radius-pill);
+    transform: translateY(-50%);
+}
+
+.sidebar-footer {
+    padding: var(--rhc-space-1);
+    border-top: 1px solid var(--rhc-border);
+}
+
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    width: 100%;
+    padding: var(--rhc-space-1);
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: transparent;
+    border: 0;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.sidebar-toggle:hover {
+    background: var(--rhc-surface-hover);
+    color: var(--rhc-text);
+}
+
+.sidebar-toggle-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    transition: transform var(--rhc-duration-slow) var(--rhc-ease);
+}
+
+.app-shell[data-sidebar="collapsed"] .sidebar-toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* Collapsed rail: hide every text label, centre the icons. */
+.app-shell[data-sidebar="collapsed"] .sidebar-brand-text,
+.app-shell[data-sidebar="collapsed"] .sidebar-link-label,
+.app-shell[data-sidebar="collapsed"] .sidebar-toggle-label,
+.app-shell[data-sidebar="collapsed"] .sidebar-section-label {
+    display: none;
+}
+
+.app-shell[data-sidebar="collapsed"] .sidebar-brand,
+.app-shell[data-sidebar="collapsed"] .sidebar-link,
+.app-shell[data-sidebar="collapsed"] .sidebar-toggle {
+    justify-content: center;
+    padding-left: var(--rhc-space-half);
+    padding-right: var(--rhc-space-half);
+}
+
+/* Backdrop only ever appears on small screens (see media queries below). */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(27, 26, 25, 0.32);
+    opacity: 0;
+    transition: opacity var(--rhc-duration-slow) var(--rhc-ease);
+}
+
+/* --------------------------------------------------------------------------
+   5. Top header
+   -------------------------------------------------------------------------- */
+.app-topbar {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    height: var(--rhc-topbar-height);
+    padding: 0 var(--rhc-space-3);
+    background: var(--rhc-surface);
+    border-bottom: 1px solid var(--rhc-border);
+}
+
+.topbar-menu-button {
+    display: none;
+}
+
+.topbar-heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.topbar-title {
+    font-size: var(--rhc-text-lg);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-subtitle {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    margin-left: auto;
+}
+
+.topbar-date {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    padding-right: var(--rhc-space-1);
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    white-space: nowrap;
+}
+
+.topbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--rhc-border);
+}
+
+/* --------------------------------------------------------------------------
+   6. Search field
+   -------------------------------------------------------------------------- */
+.rhc-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 260px;
+}
+
+.rhc-search-icon {
+    position: absolute;
+    left: var(--rhc-space-1);
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-tertiary);
+    pointer-events: none;
+}
+
+.rhc-search-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 var(--rhc-space-2) 0 30px;
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-sm);
+    transition: border-color var(--rhc-duration) var(--rhc-ease), background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-search-input::placeholder {
+    color: var(--rhc-text-tertiary);
+}
+
+.rhc-search-input:hover {
+    border-color: var(--rhc-border-strong);
+}
+
+.rhc-search-input:focus {
+    background: var(--rhc-surface);
+    border-color: var(--rhc-primary);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--rhc-primary);
+}
+
+/* --------------------------------------------------------------------------
+   7. Buttons
+   -------------------------------------------------------------------------- */
+.rhc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rhc-space-1);
+    height: 32px;
+    padding: 0 var(--rhc-space-2);
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+    color: var(--rhc-text);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border-strong);
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--rhc-duration) var(--rhc-ease), border-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-btn:hover {
+    background: var(--rhc-surface-hover);
+    text-decoration: none;
+    color: var(--rhc-text);
+}
+
+.rhc-btn:active {
+    background: var(--rhc-surface-active);
+}
+
+.rhc-btn-primary {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary);
+    border-color: var(--rhc-primary);
+}
+
+.rhc-btn-primary:hover {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary-hover);
+    border-color: var(--rhc-primary-hover);
+}
+
+.rhc-btn-primary:active {
+    background: var(--rhc-primary-active);
+    border-color: var(--rhc-primary-active);
+}
+
+.rhc-btn-subtle {
+    border-color: transparent;
+    background: transparent;
+    font-weight: 400;
+}
+
+.rhc-btn-block {
+    width: 100%;
+}
+
+/* Square icon-only button used in the header and card toolbars. */
+.rhc-icon-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: var(--rhc-text-md);
+    color: var(--rhc-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration) var(--rhc-ease), color var(--rhc-duration) var(--rhc-ease);
+}
+
+.rhc-icon-btn:hover {
+    color: var(--rhc-text);
+    background: var(--rhc-surface-hover);
+}
+
+.rhc-icon-btn:active {
+    background: var(--rhc-surface-active);
+}
+
+/* Unread count on the notifications button. */
+.rhc-badge-dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 15px;
+    text-align: center;
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-danger);
+    border: 1.5px solid var(--rhc-surface);
+    border-radius: var(--rhc-radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   8. User profile control
+   -------------------------------------------------------------------------- */
+.topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    height: 36px;
+    padding: 0 var(--rhc-space-1);
+    font-family: inherit;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.topbar-profile:hover {
+    background: var(--rhc-surface-hover);
+}
+
+.rhc-avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    font-size: var(--rhc-text-xs);
+    font-weight: 600;
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-secondary);
+    border-radius: 50%;
+}
+
+.topbar-profile-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.topbar-profile-name {
+    font-size: var(--rhc-text-base);
+    font-weight: 600;
+    color: var(--rhc-text);
+}
+
+.topbar-profile-role {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   9. Responsive shell behaviour
+   -------------------------------------------------------------------------- */
+
+/* Tablet and small laptop — collapse the rail to icons by default. */
+@media (max-width: 1200px) {
+    .app-content {
+        padding: var(--rhc-space-2);
+    }
+
+    .rhc-search {
+        width: 200px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .topbar-profile-text {
+        display: none;
+    }
+}
+
+/* Mobile — sidebar becomes an overlay drawer. */
+@media (max-width: 860px) {
+    .app-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        width: var(--rhc-sidebar-width);
+        transform: translateX(-100%);
+        box-shadow: var(--rhc-shadow-3);
+        transition: transform var(--rhc-duration-slow) var(--rhc-ease);
+    }
+
+    /* The collapsed/expanded width rule does not apply in drawer mode. */
+    .app-shell[data-sidebar="collapsed"] .app-sidebar {
+        width: var(--rhc-sidebar-width);
+    }
+
+    .app-shell[data-sidebar="collapsed"] .sidebar-brand-text,
+    .app-shell[data-sidebar="collapsed"] .sidebar-link-label,
+    .app-shell[data-sidebar="collapsed"] .sidebar-toggle-label,
+    .app-shell[data-sidebar="collapsed"] .sidebar-section-label {
+        display: block;
+    }
+
+    .app-shell[data-sidebar="collapsed"] .sidebar-brand,
+    .app-shell[data-sidebar="collapsed"] .sidebar-link,
+    .app-shell[data-sidebar="collapsed"] .sidebar-toggle {
+        justify-content: flex-start;
+        padding-left: var(--rhc-space-1);
+        padding-right: var(--rhc-space-1);
+    }
+
+    .app-shell[data-mobile-nav="open"] .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .app-shell[data-mobile-nav="open"] .sidebar-backdrop {
+        display: block;
+        opacity: 1;
+    }
+
+    /* The rail toggle is meaningless in drawer mode. */
+    .sidebar-footer {
+        display: none;
+    }
+
+    .topbar-menu-button {
+        display: grid;
+    }
+
+    .app-topbar {
+        padding: 0 var(--rhc-space-2);
+    }
+
+    .topbar-subtitle,
+    .topbar-date,
+    .topbar-divider {
+        display: none;
+    }
+
+    /* Search collapses to an icon-width field to protect the title. */
+    .rhc-search {
+        width: 40px;
+    }
+
+    .rhc-search-input {
+        padding-right: var(--rhc-space-half);
+        cursor: pointer;
+    }
+
+    .rhc-search-input:focus {
+        position: absolute;
+        right: 0;
+        width: 220px;
+        cursor: text;
+        z-index: 10;
+    }
+}
+
+@media (max-width: 560px) {
+    .app-content {
+        padding: var(--rhc-space-1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   10. Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
