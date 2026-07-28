@@ -13,15 +13,26 @@ namespace RomblonHealthConnect.Repositories;
 public class ReferralRepository : IReferralRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly IReferralAuthorizationService _authorization;
 
-    public ReferralRepository(ApplicationDbContext context)
+    public ReferralRepository(
+        ApplicationDbContext context,
+        IReferralAuthorizationService authorization)
     {
         _context = context;
+        _authorization = authorization;
     }
+
+    /// <summary>
+    /// Every read path starts here. The record scope is part of the query, so an
+    /// out-of-scope referral is never returned and never materialised.
+    /// </summary>
+    private IQueryable<Referral> ScopedReferrals() =>
+        _authorization.ApplyScope(_context.Referrals);
 
     public async Task<Referral?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Referrals
+        return await ScopedReferrals()
             .Include(r => r.Patient)
             .Include(r => r.OriginHospital)
             .Include(r => r.DestinationHospital)
@@ -37,7 +48,7 @@ public class ReferralRepository : IReferralRepository
 
     public async Task<Referral?> GetByNumberAsync(string referralNumber, CancellationToken cancellationToken = default)
     {
-        return await _context.Referrals
+        return await ScopedReferrals()
             .Include(r => r.Patient)
             .Include(r => r.OriginHospital)
             .Include(r => r.DestinationHospital)
@@ -94,13 +105,13 @@ public class ReferralRepository : IReferralRepository
         var start = dateUtc.Date;
         var end = start.AddDays(1);
 
-        return await _context.Referrals
+        return await ScopedReferrals()
             .CountAsync(r => r.CreatedUtc >= start && r.CreatedUtc < end, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Referral>> GetRecentAsync(int count, CancellationToken cancellationToken = default)
     {
-        return await _context.Referrals
+        return await ScopedReferrals()
             .OrderByDescending(r => r.CreatedUtc)
             .Take(count)
             .Include(r => r.Patient)
@@ -115,6 +126,9 @@ public class ReferralRepository : IReferralRepository
     {
         var prefix = $"RF-{year}-";
 
+        // Deliberately unscoped: referral numbers are provincial, so the next
+        // sequence must consider every facility's records. No referral data is
+        // returned here, only the number.
         var lastNumber = await _context.Referrals
             .Where(r => r.ReferralNumber.StartsWith(prefix))
             .OrderByDescending(r => r.ReferralNumber)
@@ -142,7 +156,8 @@ public class ReferralRepository : IReferralRepository
 
     public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _context.Referrals.AnyAsync(r => r.Id == id, cancellationToken);
+        // Scoped on purpose: an out-of-scope referral must read as non-existent.
+        return await ScopedReferrals().AnyAsync(r => r.Id == id, cancellationToken);
     }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -156,7 +171,9 @@ public class ReferralRepository : IReferralRepository
     /// </summary>
     private IQueryable<Referral> BuildQuery(ReferralFilter filter)
     {
-        var query = _context.Referrals.AsQueryable();
+        // Search, queues, and dashboard counts all funnel through here, so the
+        // scope applies to every one of them automatically.
+        var query = ScopedReferrals();
 
         query = filter.Scope switch
         {

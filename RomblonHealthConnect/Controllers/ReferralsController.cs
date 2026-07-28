@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RomblonHealthConnect.Constants;
 using RomblonHealthConnect.Interfaces;
 using RomblonHealthConnect.Models.Enums;
 using RomblonHealthConnect.ViewModels.Referrals;
@@ -9,9 +11,11 @@ namespace RomblonHealthConnect.Controllers;
 /// Smart Referral Engine. Serves the referral dashboard, the queues, the
 /// create-referral wizard, and the JSON endpoints those views call.
 /// </summary>
+[Authorize]
 public class ReferralsController : Controller
 {
     private readonly IReferralService _referralService;
+    private readonly IReferralAuthorizationService _referralAuthorization;
     private readonly IHospitalRepository _hospitals;
     private readonly IDoctorRepository _doctors;
     private readonly ISpecializationRepository _specializations;
@@ -23,6 +27,7 @@ public class ReferralsController : Controller
 
     public ReferralsController(
         IReferralService referralService,
+        IReferralAuthorizationService referralAuthorization,
         IHospitalRepository hospitals,
         IDoctorRepository doctors,
         ISpecializationRepository specializations,
@@ -33,6 +38,7 @@ public class ReferralsController : Controller
         ILogger<ReferralsController> logger)
     {
         _referralService = referralService;
+        _referralAuthorization = referralAuthorization;
         _hospitals = hospitals;
         _doctors = doctors;
         _specializations = specializations;
@@ -41,6 +47,18 @@ public class ReferralsController : Controller
         _fileStorage = fileStorage;
         _currentFacility = currentFacility;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Records the attempt and responds without confirming the record exists.
+    ///
+    /// Out-of-scope referrals return 404 rather than 403 so a hospital user
+    /// cannot enumerate another facility's referral ids by comparing responses.
+    /// </summary>
+    private async Task<IActionResult> DenyAsync(int referralId, string action, CancellationToken cancellationToken)
+    {
+        await _referralAuthorization.LogDeniedAsync(referralId, action, cancellationToken);
+        return NotFound();
     }
 
     /* ------------------------------------------------------------------ */
@@ -118,6 +136,12 @@ public class ReferralsController : Controller
 
     public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
     {
+        if (!await _referralAuthorization.CanViewReferralAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Details), cancellationToken);
+        }
+
+        // The service query is scoped as well, so this is defence in depth.
         var model = await _referralService.GetDetailsAsync(id, cancellationToken);
         if (model is null)
         {
@@ -133,34 +157,124 @@ public class ReferralsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Submit(int id, CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.SubmitAsync(id, cancellationToken), id);
+    [Authorize(Policy = Policies.CanCreateReferral)]
+    public async Task<IActionResult> Submit(int id, CancellationToken cancellationToken)
+    {
+        if (!await _referralAuthorization.CanModifyStatusAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Submit), cancellationToken);
+        }
+
+        return await TransitionAsync(() => _referralService.SubmitAsync(id, cancellationToken), id);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = Policies.CanReviewReferral)]
     public async Task<IActionResult> Accept(int id, int? assignedDoctorId, string? notes,
-        CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.AcceptAsync(id, assignedDoctorId, notes, cancellationToken), id);
+        CancellationToken cancellationToken)
+    {
+        // Accepting belongs to the receiving facility only.
+        if (!await _referralAuthorization.CanAcceptReferralAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Accept), cancellationToken);
+        }
+
+        return await TransitionAsync(
+            () => _referralService.AcceptAsync(id, assignedDoctorId, notes, cancellationToken), id);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Reject(int id, string reason, CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.RejectAsync(id, reason, cancellationToken), id);
+    [Authorize(Policy = Policies.CanReviewReferral)]
+    public async Task<IActionResult> Reject(int id, string reason, CancellationToken cancellationToken)
+    {
+        if (!await _referralAuthorization.CanRejectReferralAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Reject), cancellationToken);
+        }
+
+        return await TransitionAsync(() => _referralService.RejectAsync(id, reason, cancellationToken), id);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RequestInformation(int id, string question, CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.RequestInformationAsync(id, question, cancellationToken), id);
+    [Authorize(Policy = Policies.CanReviewReferral)]
+    public async Task<IActionResult> RequestInformation(int id, string question, CancellationToken cancellationToken)
+    {
+        if (!await _referralAuthorization.CanRejectReferralAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(RequestInformation), cancellationToken);
+        }
+
+        return await TransitionAsync(
+            () => _referralService.RequestInformationAsync(id, question, cancellationToken), id);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Complete(int id, string? notes, CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.CompleteAsync(id, notes, cancellationToken), id);
+    [Authorize(Policy = Policies.CanReviewReferral)]
+    public async Task<IActionResult> Complete(int id, string? notes, CancellationToken cancellationToken)
+    {
+        if (!await _referralAuthorization.CanModifyStatusAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Complete), cancellationToken);
+        }
+
+        return await TransitionAsync(() => _referralService.CompleteAsync(id, notes, cancellationToken), id);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Cancel(int id, string reason, CancellationToken cancellationToken) =>
-        await TransitionAsync(() => _referralService.CancelAsync(id, reason, cancellationToken), id);
+    [Authorize(Policy = Policies.CanCreateReferral)]
+    public async Task<IActionResult> Cancel(int id, string reason, CancellationToken cancellationToken)
+    {
+        // Cancelling belongs to the originating facility only.
+        if (!await _referralAuthorization.CanCancelReferralAsync(id, cancellationToken))
+        {
+            return await DenyAsync(id, nameof(Cancel), cancellationToken);
+        }
+
+        return await TransitionAsync(() => _referralService.CancelAsync(id, reason, cancellationToken), id);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Attachments                                                         */
+    /* ------------------------------------------------------------------ */
+
+    /// <summary>
+    /// Streams a referral attachment after authorising its PARENT referral.
+    ///
+    /// Files live outside wwwroot, so this action is the only route to them.
+    /// Authorisation is never decided from the file name alone.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> Attachment(string id, CancellationToken cancellationToken)
+    {
+        var attachment = await _referralAuthorization
+            .GetAuthorisedAttachmentAsync(id, cancellationToken);
+
+        if (attachment is null)
+        {
+            // Covers "no such file" and "not yours" identically.
+            await _referralAuthorization.LogDeniedAsync(0, "AttachmentDownload", cancellationToken);
+            return NotFound();
+        }
+
+        var path = _fileStorage.ResolvePath(attachment.StoredFileName);
+
+        if (path is null || !System.IO.File.Exists(path))
+        {
+            _logger.LogWarning("Attachment {Id} is recorded but missing on disk.", attachment.Id);
+            return NotFound();
+        }
+
+        var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        // Inline for images so the details page can preview them; the original
+        // file name is restored for the download.
+        return File(stream, attachment.ContentType, attachment.IsPreviewable ? null : attachment.FileName);
+    }
 
     /// <summary>Runs a transition and funnels both outcomes through the same feedback path.</summary>
     private async Task<IActionResult> TransitionAsync(Func<Task<ReferralOperationResult>> operation, int id)
@@ -183,6 +297,7 @@ public class ReferralsController : Controller
     /* Create wizard                                                       */
     /* ------------------------------------------------------------------ */
 
+    [Authorize(Policy = Policies.CanCreateReferral)]
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
         ViewData["Title"] = "Create Referral";
@@ -195,8 +310,16 @@ public class ReferralsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(60 * 1024 * 1024)]
+    [Authorize(Policy = Policies.CanCreateReferral)]
     public async Task<IActionResult> Create(CreateReferralViewModel form, CancellationToken cancellationToken)
     {
+        // The posted origin is not trusted: a hospital-scoped user always files
+        // from their own facility, whatever the form says.
+        if (!_referralAuthorization.HasProvinceWideScope)
+        {
+            form.OriginHospitalId = await _currentFacility.GetHospitalIdAsync(cancellationToken);
+        }
+
         if (form.OriginHospitalId == form.DestinationHospitalId)
         {
             ModelState.AddModelError(

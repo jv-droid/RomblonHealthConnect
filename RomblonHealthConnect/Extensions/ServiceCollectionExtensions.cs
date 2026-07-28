@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
         // Phase 1 foundation.
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IReferralAuthorizationService, ReferralAuthorizationService>();
 
         return services;
     }

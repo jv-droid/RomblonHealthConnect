@@ -142,12 +142,12 @@
                     <div class="attachment-list">
                         @foreach (var attachment in Model.Attachments)
                         {
-                            <a class="attachment-card" href="/uploads/referrals/@attachment.StoredFileName"
+                            <a class="attachment-card" href="@Url.Action("Attachment", "Referrals", new { id = attachment.StoredFileName })"
                                target="_blank" rel="noopener">
                                 <span class="attachment-thumb">
                                     @if (attachment.IsPreviewable)
                                     {
-                                        <img src="/uploads/referrals/@attachment.StoredFileName"
+                                        <img src="@Url.Action("Attachment", "Referrals", new { id = attachment.StoredFileName })"
                                              alt="Preview of @attachment.FileName" />
                                     }
                                     else

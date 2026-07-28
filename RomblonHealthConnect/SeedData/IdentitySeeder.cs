@@ -33,6 +33,87 @@ public static class IdentitySeeder
 
         await SeedRolesAsync(roleManager, logger, cancellationToken);
         await SeedAdministratorAsync(userManager, context, configuration, environment, logger, cancellationToken);
+        await SeedFacilityUsersAsync(userManager, context, configuration, environment, logger, cancellationToken);
+    }
+
+    /// <summary>
+    /// Development-only coordinator accounts, one per facility, so hospital-level
+    /// data scoping can actually be exercised. Uses the same configured password
+    /// as the administrator and is skipped entirely when that is unset or when
+    /// the environment is not Development.
+    /// </summary>
+    private static async Task SeedFacilityUsersAsync(
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext context,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return;
+        }
+
+        var password = configuration[SeedPasswordKey];
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            return;
+        }
+
+        // One coordinator for each of the two busiest facilities is enough to
+        // demonstrate and test cross-hospital isolation.
+        var targets = await context.Hospitals
+            .Where(h => h.IsActive && !h.IsDeleted)
+            .OrderBy(h => h.Id)
+            .Select(h => new { h.Id, h.Code, h.Name })
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        var created = 0;
+
+        foreach (var hospital in targets)
+        {
+            var userName = $"{hospital.Code}.coord";
+
+            if (await userManager.FindByNameAsync(userName) is not null)
+            {
+                continue;
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = userName,
+                Email = $"{hospital.Code}.coord@romblonhealthconnect.local",
+                EmailConfirmed = true,
+                FirstName = hospital.Name.Split(' ')[0],
+                LastName = "Coordinator",
+                DisplayName = $"{hospital.Name} Coordinator",
+                PositionTitle = "Referral Coordinator",
+                HospitalId = hospital.Id,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "system-seed"
+            };
+
+            var result = await userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, Roles.ReferralCoordinator);
+                created++;
+            }
+            else
+            {
+                logger.LogError("Could not create facility user {UserName}: {Errors}",
+                    userName, string.Join("; ", result.Errors.Select(e => e.Description)));
+            }
+        }
+
+        if (created > 0)
+        {
+            logger.LogInformation("Created {Count} development facility coordinator account(s).", created);
+        }
     }
 
     /* ------------------------------------------------------------------ */

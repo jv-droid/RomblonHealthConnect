@@ -105,6 +105,13 @@ public interface IFileStorageService
 
     Task DeleteAsync(string storedFileName, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Absolute path of a stored file, or null when the name would escape the
+    /// storage directory. Never pass a caller-supplied path straight to the file system.
+    /// </summary>
+    string? ResolvePath(string storedFileName);
+
+    /// <summary>Route to the authorised download action, not a static file URL.</summary>
     string GetPublicPath(string storedFileName);
 }
 
