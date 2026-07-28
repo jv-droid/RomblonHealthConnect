@@ -171,6 +171,10 @@
                 <span class="map-flow-key mode-executive-only">
                     <span class="map-flow-line" aria-hidden="true"></span> Active referral
                 </span>
+                <button type="button" class="rhc-icon-btn" id="mapToggleLabels"
+                        aria-pressed="true" aria-label="Hide facility labels">
+                    <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                </button>
                 <button type="button" class="rhc-icon-btn" id="mapToggleLegend"
                         aria-controls="mapLegend" aria-expanded="true" aria-label="Toggle map legend">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
@@ -182,30 +186,41 @@
             <div class="map-canvas" id="healthMap" role="application"
                  aria-label="Interactive map of health facilities in Romblon province"></div>
 
+            @* Compact two-column key. Ring meanings sit behind the info button
+               so the legend stays out of the map's way. *@
             <div class="map-legend" id="mapLegend">
-                <p class="map-legend-title">Facility type</p>
+                <div class="map-legend-head">
+                    <p class="map-legend-title">Facility type</p>
+                    <button type="button" class="map-legend-info" id="mapLegendInfo"
+                            aria-expanded="false" aria-controls="mapLegendNotes"
+                            aria-label="What the marker rings mean">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    </button>
+                </div>
+
                 <ul class="map-legend-list">
                     <li class="map-legend-item">
                         <span class="map-legend-swatch map-legend-swatch-public" aria-hidden="true"></span>
-                        Provincial / Public
+                        Provincial
                     </li>
                     <li class="map-legend-item">
                         <span class="map-legend-swatch map-legend-swatch-district" aria-hidden="true"></span>
-                        District hospital
+                        District
                     </li>
                     <li class="map-legend-item">
                         <span class="map-legend-swatch map-legend-swatch-rhu" aria-hidden="true"></span>
-                        Rural health unit
+                        RHU
                     </li>
                     <li class="map-legend-item">
                         <span class="map-legend-swatch map-legend-swatch-private" aria-hidden="true"></span>
-                        Private facility
+                        Private
                     </li>
                 </ul>
-                <p class="map-legend-note">
-                    Pulsing ring marks emergency capability.<br />
-                    Dashed ring means nearby facilities were fanned apart &mdash; zoom in for exact positions.
-                </p>
+
+                <div class="map-legend-notes" id="mapLegendNotes" hidden>
+                    <p><strong>Pulsing ring</strong> &mdash; emergency capable</p>
+                    <p><strong>Dashed ring</strong> &mdash; fanned apart from a close neighbour; zoom in for the exact position</p>
+                </div>
             </div>
         </div>
     </div>

@@ -61,6 +61,18 @@
         private: 'fa-briefcase-medical'
     };
 
+    // Referral hubs earn a label first when space is tight.
+    var TYPE_PRIORITY = { public: 0, district: 1, private: 2, rhu: 3 };
+
+    // Below this zoom only the higher tiers are eligible, so the province view
+    // stays readable; above it every facility competes for a label.
+    var LABEL_ALL_ZOOM = 9.6;
+
+    // Zoom at which a label can afford its second line of detail.
+    var LABEL_DETAIL_ZOOM = 10.5;
+
+    var LABEL_GAP = 3;
+
     /* ----------------------------------------------------------------------
        2. State
        ---------------------------------------------------------------------- */
@@ -77,6 +89,34 @@
     /* ----------------------------------------------------------------------
        3. Markers
        ---------------------------------------------------------------------- */
+
+    /**
+     * Second label line: the figures a coordinator scans for before clicking.
+     * Anything unknown is left out rather than shown as a zero.
+     */
+    function describeFacility(facility) {
+        var parts = [];
+
+        if (typeof facility.bedsAvailable === 'number' && facility.bedsTotal) {
+            parts.push(facility.bedsAvailable + '/' + facility.bedsTotal + ' beds');
+        }
+
+        if (facility.doctorsAvailable) {
+            parts.push(facility.doctorsAvailable + ' doctors');
+        }
+
+        if (facility.emergency) {
+            parts.push('ER');
+        }
+
+        if (facility.status === 'offline') {
+            parts.push('offline');
+        } else if (facility.status === 'limited') {
+            parts.push('limited');
+        }
+
+        return parts.join(' · ');
+    }
 
     function createMarkerElement(facility) {
         var element = document.createElement('button');
@@ -115,6 +155,24 @@
 
         shape.appendChild(icon);
         element.appendChild(shape);
+
+        // Label rides inside the marker so it follows any declutter offset.
+        // The marker's aria-label already carries this text, so it is decorative.
+        var label = document.createElement('span');
+        label.className = 'map-marker-label';
+        label.setAttribute('aria-hidden', 'true');
+
+        var name = document.createElement('span');
+        name.className = 'map-marker-label-name';
+        name.textContent = facility.name;
+        label.appendChild(name);
+
+        var meta = document.createElement('span');
+        meta.className = 'map-marker-label-meta';
+        meta.textContent = describeFacility(facility);
+        label.appendChild(meta);
+
+        element.appendChild(label);
 
         element.addEventListener('click', function (event) {
             event.stopPropagation();
@@ -210,6 +268,90 @@
         placed.forEach(function (item) {
             markers[item.id].setOffset([item.x - item.at.x, item.y - item.at.y]);
             markers[item.id].getElement().classList.toggle('is-fanned', item.fanned);
+        });
+
+        // Offsets are final, so labels can now be allocated against real positions.
+        updateLabels(placed);
+    }
+
+    /**
+     * Grants a label to as many facilities as will fit without overlapping.
+     *
+     * Candidates are sorted by facility tier, then by how much of the network
+     * they serve, and each is accepted only if its box clears every label
+     * already granted. This mirrors how MapLibre handles symbol collision, but
+     * works on the HTML markers so labels track the declutter offsets.
+     *
+     * @param {Array} placed - markers with settled screen positions
+     */
+    function updateLabels(placed) {
+        if (!map) { return; }
+
+        var zoom = map.getZoom();
+        var shell = map.getContainer().closest('.map-shell');
+
+        if (shell) {
+            shell.setAttribute('data-label-detail', zoom >= LABEL_DETAIL_ZOOM ? 'high' : 'low');
+        }
+
+        var showEveryTier = zoom >= LABEL_ALL_ZOOM;
+
+        var candidates = placed.map(function (item) {
+            var facility = RHC.getFacility ? RHC.getFacility(item.id) : null;
+            var priority = facility && TYPE_PRIORITY.hasOwnProperty(facility.type)
+                ? TYPE_PRIORITY[facility.type]
+                : 9;
+
+            return {
+                id: item.id,
+                x: item.x,
+                y: item.y,
+                priority: priority,
+                weight: facility ? (facility.bedsTotal || 0) : 0,
+                eligible: Boolean(facility) && (showEveryTier || priority <= 1)
+            };
+        });
+
+        // Highest tier first; larger facilities break ties.
+        candidates.sort(function (a, b) {
+            return a.priority - b.priority || b.weight - a.weight;
+        });
+
+        var granted = [];
+
+        candidates.forEach(function (candidate) {
+            var element = markers[candidate.id].getElement();
+            var label = element.querySelector('.map-marker-label');
+
+            if (!label || !candidate.eligible) {
+                element.classList.remove('has-label');
+                return;
+            }
+
+            // Measure while visible, otherwise the box is zero-sized.
+            element.classList.add('has-label');
+            var size = label.getBoundingClientRect();
+
+            var box = {
+                left: candidate.x - size.width / 2 - LABEL_GAP,
+                right: candidate.x + size.width / 2 + LABEL_GAP,
+                top: candidate.y + 16,
+                bottom: candidate.y + 16 + size.height + LABEL_GAP
+            };
+
+            var collides = granted.some(function (other) {
+                return !(box.right < other.left
+                    || box.left > other.right
+                    || box.bottom < other.top
+                    || box.top > other.bottom);
+            });
+
+            if (collides) {
+                element.classList.remove('has-label');
+                return;
+            }
+
+            granted.push(box);
         });
     }
 
@@ -504,6 +646,33 @@
                 var nowHidden = !legend.hasAttribute('hidden');
                 legend.toggleAttribute('hidden', nowHidden);
                 legendButton.setAttribute('aria-expanded', String(!nowHidden));
+            });
+        }
+
+        // Ring meanings stay collapsed so the legend keeps its small footprint.
+        var legendInfo = document.getElementById('mapLegendInfo');
+        var legendNotes = document.getElementById('mapLegendNotes');
+
+        if (legendInfo && legendNotes) {
+            legendInfo.addEventListener('click', function () {
+                var opening = legendNotes.hasAttribute('hidden');
+
+                legendNotes.toggleAttribute('hidden', !opening);
+                legendInfo.setAttribute('aria-expanded', String(opening));
+            });
+        }
+
+        var labelButton = document.getElementById('mapToggleLabels');
+        var shell = map ? map.getContainer().closest('.map-shell') : null;
+
+        if (labelButton && shell) {
+            labelButton.addEventListener('click', function () {
+                var turningOff = shell.getAttribute('data-labels') !== 'off';
+
+                shell.setAttribute('data-labels', turningOff ? 'off' : 'on');
+                labelButton.setAttribute('aria-pressed', String(!turningOff));
+                labelButton.setAttribute('aria-label',
+                    turningOff ? 'Show facility labels' : 'Hide facility labels');
             });
         }
     }

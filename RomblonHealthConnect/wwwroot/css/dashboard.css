@@ -536,6 +536,87 @@
     box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.18), var(--rhc-shadow-3);
 }
 
+/* --------------------------------------------------------------------------
+   Marker labels
+   Hidden by default and revealed by health-map.js, which grants labels in
+   priority order and skips any that would collide. Hover, focus, and selection
+   always win, so a label is reachable even when the map is dense.
+   -------------------------------------------------------------------------- */
+.map-marker-label {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 50%;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    max-width: 168px;
+    padding: 3px var(--rhc-space-1);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-sm);
+    box-shadow: var(--rhc-shadow-1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-2px);
+    transition: opacity var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease),
+                visibility var(--rhc-duration);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.map-marker-label-name {
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.3;
+    color: var(--rhc-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Second line only appears once the map is zoomed in enough to afford it. */
+.map-marker-label-meta {
+    display: none;
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--rhc-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.map-shell[data-label-detail="high"] .map-marker-label-meta {
+    display: block;
+}
+
+.map-marker.has-label .map-marker-label,
+.map-marker:hover .map-marker-label,
+.map-marker:focus-visible .map-marker-label,
+.map-marker.is-selected .map-marker-label {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Hover and selection lift the label above neighbouring markers. */
+.map-marker:hover .map-marker-label,
+.map-marker.is-selected .map-marker-label {
+    z-index: 4;
+    border-color: var(--rhc-border-strong);
+    box-shadow: var(--rhc-shadow-2);
+}
+
+.map-marker.is-selected .map-marker-label {
+    border-color: var(--rhc-primary);
+}
+
+/* Labels off entirely, via the map toolbar toggle. */
+.map-shell[data-labels="off"] .map-marker.has-label .map-marker-label {
+    opacity: 0;
+    visibility: hidden;
+}
+
 /* Markers fanned apart because neighbours would overlap at this zoom. The
    heavier ring signals the position is approximate until you zoom in. */
 .map-marker.is-fanned .map-marker-shape {
@@ -553,34 +634,61 @@
     animation: none;
 }
 
-/* Legend */
+/* Legend — deliberately small; it sits on top of the map. */
 .map-legend {
     position: absolute;
     left: var(--rhc-space-2);
     bottom: var(--rhc-space-2);
     z-index: 2;
-    min-width: 176px;
-    padding: var(--rhc-space-2);
+    padding: var(--rhc-space-1);
     background: rgba(255, 255, 255, 0.94);
     border: 1px solid var(--rhc-border);
-    border-radius: var(--rhc-radius-md);
-    box-shadow: var(--rhc-shadow-2);
+    border-radius: var(--rhc-radius-sm);
+    box-shadow: var(--rhc-shadow-1);
     backdrop-filter: blur(8px);
 }
 
+.map-legend-head {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    margin-bottom: 5px;
+}
+
 .map-legend-title {
-    margin-bottom: var(--rhc-space-1);
-    font-size: var(--rhc-text-xs);
+    font-size: 10px;
     font-weight: var(--rhc-weight-semibold);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--rhc-text-tertiary);
 }
 
+.map-legend-info {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    margin-left: auto;
+    padding: 0;
+    font-size: 11px;
+    color: var(--rhc-text-tertiary);
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color var(--rhc-duration) var(--rhc-ease);
+}
+
+.map-legend-info:hover,
+.map-legend-info[aria-expanded="true"] {
+    color: var(--rhc-primary);
+}
+
+/* Two columns halves the height compared with a single stacked list. */
 .map-legend-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 3px var(--rhc-space-2);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -589,15 +697,17 @@
 .map-legend-item {
     display: flex;
     align-items: center;
-    gap: var(--rhc-space-1);
-    font-size: var(--rhc-text-sm);
+    gap: 5px;
+    font-size: var(--rhc-text-xs);
+    line-height: 1.3;
     color: var(--rhc-text-secondary);
+    white-space: nowrap;
 }
 
 .map-legend-swatch {
     flex-shrink: 0;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
 }
 
@@ -606,12 +716,27 @@
 .map-legend-swatch-rhu { background: var(--rhc-type-rhu); }
 .map-legend-swatch-private { background: var(--rhc-type-private); }
 
-.map-legend-note {
-    margin-top: var(--rhc-space-1);
-    padding-top: var(--rhc-space-1);
+/* Ring meanings, revealed by the info button. */
+.map-legend-notes {
+    max-width: 210px;
+    margin-top: 5px;
+    padding-top: 5px;
     border-top: 1px solid var(--rhc-divider);
-    font-size: var(--rhc-text-xs);
+}
+
+.map-legend-notes p {
+    font-size: 10px;
+    line-height: 1.4;
     color: var(--rhc-text-tertiary);
+}
+
+.map-legend-notes p + p {
+    margin-top: 2px;
+}
+
+.map-legend-notes strong {
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-text-secondary);
 }
 
 /* Referral flow key, executive mode only. */
@@ -1189,15 +1314,14 @@
         top: 0;
     }
 
+    /* Tuck into the corner; the base legend is already compact. */
     .map-legend {
         left: var(--rhc-space-1);
         bottom: var(--rhc-space-1);
-        min-width: 0;
-        padding: var(--rhc-space-1);
     }
 
-    .map-legend-item {
-        font-size: var(--rhc-text-xs);
+    .map-legend-notes {
+        max-width: 168px;
     }
 
     /* Drawer becomes a bottom sheet. */

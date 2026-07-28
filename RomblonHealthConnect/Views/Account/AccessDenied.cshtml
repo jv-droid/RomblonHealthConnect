@@ -1,0 +1,23 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Access denied";
+}
+
+<div class="auth-notice-icon auth-notice-icon-danger" aria-hidden="true">
+    <i class="fa-solid fa-shield-halved"></i>
+</div>
+
+<h1 class="auth-title">Access denied</h1>
+<p class="auth-notice-body">
+    Your account does not have permission to open this page. If you believe this
+    is a mistake, contact the Provincial Health Office.
+</p>
+
+<a class="rhc-btn rhc-btn-primary rhc-btn-block" asp-controller="Home" asp-action="Index">
+    Return to dashboard
+</a>
+
+<form method="post" asp-controller="Account" asp-action="Logout" class="section-spaced">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="rhc-btn rhc-btn-block">Sign in as a different user</button>
+</form>

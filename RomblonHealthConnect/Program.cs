@@ -1,17 +1,37 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RomblonHealthConnect.Data;
 using RomblonHealthConnect.Extensions;
 using RomblonHealthConnect.Hubs;
 using RomblonHealthConnect.SeedData;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+// Structured logging to console and rolling file.
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/rhc-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14));
+
+// Every endpoint requires an authenticated user unless it opts out with
+// [AllowAnonymous]. Securing by default avoids a new controller shipping open.
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSignalR();
 
-// Session carries the acting facility until authentication is introduced.
+// Session still carries lightweight UI state (the acting facility fallback).
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -22,12 +42,14 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddApplicationDatabase(builder.Configuration);
+builder.Services.AddApplicationIdentity(builder.Environment);
+builder.Services.AddApplicationAuthorization();
 builder.Services.AddApplicationRepositories();
 builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Apply migrations and seed demo data on startup.
+// Apply migrations, then seed roles and demo data.
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -36,27 +58,39 @@ await using (var scope = app.Services.CreateAsyncScope())
     try
     {
         await context.Database.MigrateAsync();
+
         await DatabaseSeeder.SeedAsync(context, logger);
+        await IdentitySeeder.SeedAsync(
+            scope.ServiceProvider, app.Configuration, app.Environment, logger);
     }
     catch (Exception ex)
     {
-        // The GIS dashboard runs on client-side data, so it stays usable without a database.
-        logger.LogError(ex, "Database migration or seeding failed. Referral features will be unavailable.");
+        logger.LogError(ex, "Database migration or seeding failed. The application may be unusable.");
     }
 }
 
-// Configure the HTTP request pipeline.
+/* -- middleware pipeline, in required order --------------------------- */
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
+
+// Renders friendly pages for 404 and other status-only responses.
+app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -66,6 +100,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapControllers();
+
 app.MapHub<ReferralHub>("/hubs/referrals");
 
 app.Run();
+
+/// <summary>Exposed so the integration test project can build a host.</summary>
+public partial class Program;

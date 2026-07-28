@@ -1,0 +1,53 @@
+@model RomblonHealthConnect.ViewModels.Account.LoginViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="auth-brand">
+    <span class="auth-brand-mark" aria-hidden="true"><i class="fa-solid fa-heart-pulse"></i></span>
+    <div>
+        <h1 class="auth-title">Romblon HealthConnect</h1>
+        <p class="auth-subtitle">Provincial Hospital and Referral Network</p>
+    </div>
+</div>
+
+<form method="post" asp-action="Login" class="auth-form">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="ReturnUrl" />
+
+    <div asp-validation-summary="ModelOnly" class="rhc-alert rhc-alert-error" role="alert"></div>
+
+    <div class="filter-field">
+        <label class="filter-label" asp-for="UserNameOrEmail"></label>
+        <input class="rhc-input" asp-for="UserNameOrEmail" autocomplete="username"
+               autofocus placeholder="name@romblonhealthconnect.local" />
+        <span class="rhc-field-error" asp-validation-for="UserNameOrEmail"></span>
+    </div>
+
+    <div class="filter-field section-spaced">
+        <label class="filter-label" asp-for="Password"></label>
+        <input class="rhc-input" asp-for="Password" type="password" autocomplete="current-password" />
+        <span class="rhc-field-error" asp-validation-for="Password"></span>
+    </div>
+
+    <div class="auth-row section-spaced">
+        <label class="auth-check">
+            <input type="checkbox" asp-for="RememberMe" />
+            <span>@Html.DisplayNameFor(m => m.RememberMe)</span>
+        </label>
+        <a asp-action="ForgotPassword">Forgot password?</a>
+    </div>
+
+    <button type="submit" class="rhc-btn rhc-btn-primary rhc-btn-block section-spaced">
+        Sign in
+    </button>
+</form>
+
+<p class="auth-footnote">
+    Authorized personnel only. Activity on this system is recorded.
+</p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

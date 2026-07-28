@@ -46,6 +46,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<ICurrentFacilityProvider, CurrentFacilityProvider>();
 
+        // Phase 1 foundation.
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IAuditService, AuditService>();
+
         return services;
     }
 }

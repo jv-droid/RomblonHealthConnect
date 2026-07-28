@@ -18,7 +18,7 @@ public class HospitalRepository : IHospitalRepository
     public async Task<IReadOnlyList<Hospital>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Hospitals
-            .Where(h => h.IsActive)
+            .Where(h => h.IsActive && !h.IsDeleted)
             .OrderBy(h => h.Name)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -43,7 +43,7 @@ public class HospitalRepository : IHospitalRepository
         CancellationToken cancellationToken = default)
     {
         return await _context.Hospitals
-            .Where(h => h.IsActive && h.Id != originHospitalId)
+            .Where(h => h.IsActive && !h.IsDeleted && h.Id != originHospitalId)
             // Facilities that are reporting and can admit come first.
             .OrderByDescending(h => h.Status == FacilityStatus.Online)
             .ThenByDescending(h => h.HasEmergency)
@@ -55,7 +55,7 @@ public class HospitalRepository : IHospitalRepository
     public async Task<IReadOnlyList<string>> GetMunicipalitiesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Hospitals
-            .Where(h => h.IsActive)
+            .Where(h => h.IsActive && !h.IsDeleted)
             .Select(h => h.Municipality)
             .Distinct()
             .OrderBy(m => m)
@@ -67,7 +67,9 @@ public class HospitalRepository : IHospitalRepository
     public async Task<IReadOnlyList<Hospital>> GetAllIncludingInactiveAsync(
         CancellationToken cancellationToken = default)
     {
+        // Includes inactive facilities for the registry, but never soft-deleted ones.
         return await _context.Hospitals
+            .Where(h => !h.IsDeleted)
             .OrderBy(h => h.Municipality)
             .ThenBy(h => h.Name)
             .AsNoTracking()

@@ -1,3 +1,7 @@
+@using RomblonHealthConnect.Constants
+@using RomblonHealthConnect.Interfaces
+@inject ICurrentUserService CurrentUser
+@inject IAuthorizationService Authorization
 @{
     var pageTitle = ViewData["Title"] as string ?? "Dashboard";
     var pageSubtitle = ViewData["Subtitle"] as string;
@@ -6,6 +10,18 @@
     // Marks a nav item active and sets aria-current in one place.
     Func<string, string> navClass = key => activeNav == key ? "sidebar-link is-active" : "sidebar-link";
     Func<string, string?> navCurrent = key => activeNav == key ? "page" : null;
+
+    // Navigation is filtered by permission, but every endpoint is also secured
+    // server-side; hiding a link is presentation, not access control.
+    async Task<bool> Allowed(string policy) =>
+        (await Authorization.AuthorizeAsync(User, policy)).Succeeded;
+
+    var canManageHospitals = await Allowed(Policies.CanManageHospitalData);
+    var canManageUsers = await Allowed(Policies.CanManageUsers);
+    var canViewAudit = await Allowed(Policies.CanViewAuditLogs);
+    var canCreateReferral = await Allowed(Policies.CanCreateReferral);
+
+    var primaryRole = CurrentUser.Roles.FirstOrDefault();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -63,6 +79,8 @@
                     </li>
                 </ul>
 
+                @if (canManageHospitals)
+                {
                 <p class="sidebar-section-label mode-operations-only">Facilities</p>
                 <ul class="sidebar-nav-list mode-operations-only">
                     <li>
@@ -73,6 +91,7 @@
                         </a>
                     </li>
                 </ul>
+                }
 
                 <p class="sidebar-section-label mode-operations-only">Medical Staff</p>
                 <ul class="sidebar-nav-list mode-operations-only">
@@ -172,6 +191,8 @@
                     </li>
                 </ul>
 
+                @if (canManageUsers || canViewAudit)
+                {
                 <p class="sidebar-section-label mode-operations-only">Administration</p>
                 <ul class="sidebar-nav-list mode-operations-only">
                     <li>
@@ -181,6 +202,7 @@
                         </a>
                     </li>
                 </ul>
+                }
             </nav>
 
             <div class="sidebar-footer">
@@ -257,13 +279,54 @@
                         <span class="rhc-badge-dot" id="notificationBadge" aria-hidden="true" hidden></span>
                     </button>
 
-                    <button type="button" class="topbar-profile" id="profileButton" aria-label="Account menu for J. Molino">
-                        <span class="rhc-avatar" aria-hidden="true">JM</span>
-                        <span class="topbar-profile-text">
-                            <span class="topbar-profile-name">J. Molino</span>
-                            <span class="topbar-profile-role">Provincial Administrator</span>
-                        </span>
-                    </button>
+                    <div class="topbar-account">
+                        <button type="button" class="topbar-profile" id="profileButton"
+                                aria-controls="accountMenu" aria-expanded="false"
+                                aria-label="Account menu for @CurrentUser.DisplayName">
+                            <span class="rhc-avatar" aria-hidden="true">@Initials(CurrentUser.DisplayName)</span>
+                            <span class="topbar-profile-text">
+                                <span class="topbar-profile-name">@CurrentUser.DisplayName</span>
+                                <span class="topbar-profile-role">
+                                    @(CurrentUser.PositionTitle ?? primaryRole ?? "Signed in")
+                                </span>
+                            </span>
+                        </button>
+
+                        <div class="account-menu" id="accountMenu">
+                            <div class="account-menu-head">
+                                <span class="account-menu-name">@CurrentUser.DisplayName</span>
+                                <span class="account-menu-meta">@CurrentUser.UserName</span>
+                                @if (primaryRole is not null)
+                                {
+                                    <span class="rhc-badge rhc-badge-info">@primaryRole</span>
+                                }
+                                @if (CurrentUser.HospitalId.HasValue)
+                                {
+                                    <span class="account-menu-meta">
+                                        <i class="fa-regular fa-hospital" aria-hidden="true"></i>
+                                        Facility scope
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="account-menu-meta">
+                                        <i class="fa-solid fa-map" aria-hidden="true"></i> Province-wide access
+                                    </span>
+                                }
+                            </div>
+
+                            <a class="account-menu-item" asp-controller="Account" asp-action="ChangePassword">
+                                <i class="fa-solid fa-key" aria-hidden="true"></i> Change password
+                            </a>
+
+                            <form method="post" asp-controller="Account" asp-action="Logout">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="account-menu-item account-menu-danger">
+                                    <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -318,3 +381,19 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@functions {
+    // Two-letter avatar initials from a display name.
+    static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) { return "?"; }
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+        {
+            return parts[0].Substring(0, 1).ToUpperInvariant();
+        }
+
+        return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpperInvariant();
+    }
+}

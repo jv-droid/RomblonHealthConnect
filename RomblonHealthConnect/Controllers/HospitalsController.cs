@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RomblonHealthConnect.Constants;
 using RomblonHealthConnect.Interfaces;
@@ -12,21 +13,34 @@ namespace RomblonHealthConnect.Controllers;
 /// Facility registry. Anything saved here appears on the provincial map
 /// immediately, because the map reads the same records.
 /// </summary>
+[Authorize(Policy = Policies.CanManageHospitalData)]
 public class HospitalsController : Controller
 {
     private readonly IHospitalRepository _hospitals;
     private readonly IDoctorRepository _doctors;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IAuditService _audit;
     private readonly ILogger<HospitalsController> _logger;
 
     public HospitalsController(
         IHospitalRepository hospitals,
         IDoctorRepository doctors,
+        ICurrentUserService currentUser,
+        IAuditService audit,
         ILogger<HospitalsController> logger)
     {
         _hospitals = hospitals;
         _doctors = doctors;
+        _currentUser = currentUser;
+        _audit = audit;
         _logger = logger;
     }
+
+    /// <summary>
+    /// Server-side record scope. A hospital-scoped user may only touch their own
+    /// facility, whatever id arrives in the route, form, or query string.
+    /// </summary>
+    private bool CanAccess(int hospitalId) => _currentUser.CanAccessHospital(hospitalId);
 
     /* ------------------------------------------------------------------ */
     /* List                                                                */
@@ -41,6 +55,13 @@ public class HospitalsController : Controller
         var all = await _hospitals.GetAllIncludingInactiveAsync(cancellationToken);
 
         var filtered = all.AsEnumerable();
+
+        // Hospital-scoped roles only ever see their own facility.
+        if (!_currentUser.HasProvinceWideScope && _currentUser.HospitalId.HasValue)
+        {
+            var ownId = _currentUser.HospitalId.Value;
+            filtered = filtered.Where(h => h.Id == ownId);
+        }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -86,6 +107,7 @@ public class HospitalsController : Controller
     /* Create                                                              */
     /* ------------------------------------------------------------------ */
 
+    [Authorize(Policy = Policies.CanManageHospitals)]
     public IActionResult Create()
     {
         SetFormViewData("Add Facility", "Register a hospital, rural health unit, or private clinic");
@@ -99,6 +121,7 @@ public class HospitalsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = Policies.CanManageHospitals)]
     public async Task<IActionResult> Create(HospitalFormViewModel form, CancellationToken cancellationToken)
     {
         var code = await ResolveCodeAsync(form, null, cancellationToken);
@@ -112,11 +135,19 @@ public class HospitalsController : Controller
         var hospital = new Hospital { Code = code };
         form.ApplyTo(hospital);
 
+        hospital.CreatedAt = DateTime.UtcNow;
+        hospital.CreatedBy = _currentUser.UserId;
+
         await _hospitals.AddAsync(hospital, cancellationToken);
         await _hospitals.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Facility {Code} ({Name}) registered at {Lat},{Lon}.",
             hospital.Code, hospital.Name, hospital.Latitude, hospital.Longitude);
+
+        await _audit.LogAsync(AuditActions.HospitalCreated, nameof(Hospital),
+            hospital.Id.ToString(), $"Facility '{hospital.Name}' registered.",
+            newValues: new { hospital.Code, hospital.Name, hospital.Municipality },
+            cancellationToken: cancellationToken);
 
         TempData["StatusMessage"] = $"{hospital.Name} was added and now appears on the provincial map.";
         return RedirectToAction(nameof(Index));
@@ -134,6 +165,12 @@ public class HospitalsController : Controller
             return NotFound();
         }
 
+        // Prevents an insecure direct object reference via the route id.
+        if (!CanAccess(id))
+        {
+            return Forbid();
+        }
+
         SetFormViewData("Edit Facility", hospital.Name);
         return View("Form", HospitalFormViewModel.FromEntity(hospital));
     }
@@ -148,6 +185,11 @@ public class HospitalsController : Controller
             return NotFound();
         }
 
+        if (!CanAccess(id))
+        {
+            return Forbid();
+        }
+
         form.Id = id;
         var code = await ResolveCodeAsync(form, id, cancellationToken);
 
@@ -157,10 +199,24 @@ public class HospitalsController : Controller
             return View("Form", form);
         }
 
+        var before = new { hospital.Name, hospital.Municipality, hospital.Latitude, hospital.Longitude,
+                           hospital.AvailableBeds, hospital.TotalBeds, hospital.IsActive };
+
         hospital.Code = code;
         form.ApplyTo(hospital);
 
+        // CreatedAt/CreatedBy are never overwritten on update.
+        hospital.UpdatedAt = DateTime.UtcNow;
+        hospital.UpdatedBy = _currentUser.UserId;
+
         await _hospitals.SaveChangesAsync(cancellationToken);
+
+        await _audit.LogAsync(AuditActions.HospitalUpdated, nameof(Hospital),
+            hospital.Id.ToString(), $"Facility '{hospital.Name}' updated.",
+            oldValues: before,
+            newValues: new { hospital.Name, hospital.Municipality, hospital.Latitude, hospital.Longitude,
+                             hospital.AvailableBeds, hospital.TotalBeds, hospital.IsActive },
+            cancellationToken: cancellationToken);
 
         TempData["StatusMessage"] = $"{hospital.Name} was updated. The map reflects the change.";
         return RedirectToAction(nameof(Index));
@@ -172,6 +228,7 @@ public class HospitalsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = Policies.CanManageHospitals)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var hospital = await _hospitals.GetForUpdateAsync(id, cancellationToken);
@@ -189,8 +246,15 @@ public class HospitalsController : Controller
             hospital.IsActive = false;
             hospital.Status = FacilityStatus.Offline;
             hospital.LastUpdatedUtc = DateTime.UtcNow;
+            hospital.UpdatedAt = DateTime.UtcNow;
+            hospital.UpdatedBy = _currentUser.UserId;
 
             await _hospitals.SaveChangesAsync(cancellationToken);
+
+            await _audit.LogAsync(AuditActions.HospitalDeactivated, nameof(Hospital),
+                hospital.Id.ToString(),
+                $"Facility '{hospital.Name}' deactivated ({referrals} referral(s), {doctors} doctor(s) on record).",
+                cancellationToken: cancellationToken);
 
             TempData["StatusMessage"] =
                 $"{hospital.Name} has {referrals} referral(s) and {doctors} doctor(s) on record, " +
@@ -199,8 +263,19 @@ public class HospitalsController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        _hospitals.Remove(hospital);
+        // Unused facility: soft delete keeps the row auditable rather than
+        // removing it outright.
+        hospital.IsDeleted = true;
+        hospital.DeletedAt = DateTime.UtcNow;
+        hospital.IsActive = false;
+        hospital.UpdatedAt = DateTime.UtcNow;
+        hospital.UpdatedBy = _currentUser.UserId;
+
         await _hospitals.SaveChangesAsync(cancellationToken);
+
+        await _audit.LogAsync(AuditActions.HospitalDeleted, nameof(Hospital),
+            hospital.Id.ToString(), $"Facility '{hospital.Name}' soft-deleted.",
+            cancellationToken: cancellationToken);
 
         TempData["StatusMessage"] = $"{hospital.Name} was removed from the network.";
         return RedirectToAction(nameof(Index));

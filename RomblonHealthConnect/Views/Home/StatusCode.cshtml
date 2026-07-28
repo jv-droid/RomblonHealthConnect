@@ -1,0 +1,23 @@
+@{
+    Layout = "_AuthLayout";
+    var code = ViewData["StatusCode"] as int? ?? 404;
+    ViewData["Title"] = $"Error {code}";
+
+    var (heading, detail) = code switch
+    {
+        404 => ("Page not found", "The page you requested does not exist or has moved."),
+        403 => ("Access denied", "Your account does not have permission to view this page."),
+        _   => ("Something went wrong", "The request could not be completed. Please try again.")
+    };
+}
+
+<div class="auth-notice-icon auth-notice-icon-danger" aria-hidden="true">
+    <i class="fa-solid fa-circle-exclamation"></i>
+</div>
+
+<h1 class="auth-title">@heading</h1>
+<p class="auth-notice-body">@detail</p>
+
+<a class="rhc-btn rhc-btn-primary rhc-btn-block" asp-controller="Home" asp-action="Index">
+    Return to dashboard
+</a>

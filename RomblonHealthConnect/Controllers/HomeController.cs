@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RomblonHealthConnect.Data;
@@ -8,6 +9,7 @@ using RomblonHealthConnect.ViewModels.Referrals;
 
 namespace RomblonHealthConnect.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -24,9 +26,19 @@ public class HomeController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
+    }
+
+    /// <summary>Friendly page for 404 and other status-only responses.</summary>
+    [AllowAnonymous]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult StatusCode(int? code)
+    {
+        ViewData["StatusCode"] = code ?? 404;
+        return View("StatusCode");
     }
 
     /// <summary>
@@ -182,6 +194,7 @@ public class HomeController : Controller
         _ => "off-duty"
     };
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

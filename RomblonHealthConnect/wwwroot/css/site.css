@@ -1087,3 +1087,92 @@ a:hover {
         scroll-behavior: auto !important;
     }
 }
+
+/* --------------------------------------------------------------------------
+   15. Account menu
+   -------------------------------------------------------------------------- */
+.topbar-account {
+    position: relative;
+}
+
+.account-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    min-width: 260px;
+    padding: var(--rhc-space-1);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease),
+                visibility var(--rhc-duration);
+}
+
+.account-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.account-menu-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: var(--rhc-space-1) var(--rhc-space-2) var(--rhc-space-2);
+    border-bottom: 1px solid var(--rhc-divider);
+    margin-bottom: var(--rhc-space-half);
+}
+
+.account-menu-name {
+    font-size: var(--rhc-text-md);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.account-menu-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.account-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    width: 100%;
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-family: inherit;
+    font-size: var(--rhc-text-base);
+    text-align: left;
+    color: var(--rhc-text);
+    background: transparent;
+    border: 0;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration) var(--rhc-ease);
+}
+
+.account-menu-item:hover {
+    background: var(--rhc-surface-hover);
+    text-decoration: none;
+    color: var(--rhc-text);
+}
+
+.account-menu-danger {
+    color: var(--rhc-danger);
+}
+
+.account-menu-danger:hover {
+    color: var(--rhc-danger);
+    background: var(--rhc-danger-subtle);
+}

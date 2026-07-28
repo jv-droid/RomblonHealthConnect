@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Romblon HealthConnect — Authentication screens
+   Minimal Fluent-inspired surface on the same token system as the application.
+   ========================================================================== */
+
+.auth-body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--rhc-bg);
+}
+
+.auth-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rhc-space-3);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--rhc-space-3);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--rhc-space-5);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-2);
+}
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    margin-bottom: var(--rhc-space-4);
+}
+
+.auth-brand-mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    font-size: var(--rhc-text-lg);
+    color: var(--rhc-text-inverse);
+    background: linear-gradient(140deg, var(--rhc-primary), var(--rhc-secondary));
+    border-radius: var(--rhc-radius-md);
+}
+
+.auth-title {
+    font-size: var(--rhc-text-xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.auth-subtitle {
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.auth-form {
+    display: block;
+}
+
+.auth-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--rhc-space-2);
+    font-size: var(--rhc-text-base);
+}
+
+.auth-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    color: var(--rhc-text-secondary);
+    cursor: pointer;
+}
+
+.auth-footnote {
+    margin-top: var(--rhc-space-3);
+    padding-top: var(--rhc-space-2);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+    text-align: center;
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.auth-meta {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-tertiary);
+}
+
+/* Denied / confirmation screens reuse the same card. */
+.auth-notice-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--rhc-space-2);
+    font-size: var(--rhc-text-xl);
+    border-radius: 50%;
+}
+
+.auth-notice-icon-danger {
+    color: var(--rhc-danger);
+    background: var(--rhc-danger-subtle);
+}
+
+.auth-notice-icon-success {
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+}
+
+.auth-notice-body {
+    margin-bottom: var(--rhc-space-3);
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: var(--rhc-space-3);
+    }
+}
