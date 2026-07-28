@@ -1,223 +1,396 @@
 /* ==========================================================================
-   Romblon HealthConnect — Dashboard components
+   Romblon HealthConnect — Provincial dashboard
+   Executive overview, GIS map hero, operational lists, and the facility drawer.
    Depends on the tokens declared in site.css.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Shared card shell
+   2. Page rhythm
    -------------------------------------------------------------------------- */
-.rhc-card {
+
+/* Every top-level band of the dashboard. Generous, consistent vertical space. */
+.dash-section {
+    margin-bottom: var(--rhc-space-5);
+}
+
+.dash-section:last-child {
+    margin-bottom: 0;
+}
+
+.dash-section-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-2);
+    margin-bottom: var(--rhc-space-2);
+}
+
+.dash-section-title {
+    font-size: var(--rhc-text-lg);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: -0.01em;
+}
+
+.dash-section-hint {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.dash-section-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    margin-left: auto;
+}
+
+/* Separates stacked blocks inside a single section. */
+.dash-gap-top {
+    margin-top: var(--rhc-space-2);
+}
+
+/* Entrance: content settles in rather than appearing. */
+.dash-fade {
+    animation: dash-fade-in var(--rhc-duration-slower) var(--rhc-ease-out) both;
+}
+
+.dash-fade-1 { animation-delay: 0ms; }
+.dash-fade-2 { animation-delay: 60ms; }
+.dash-fade-3 { animation-delay: 120ms; }
+.dash-fade-4 { animation-delay: 180ms; }
+
+@keyframes dash-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   3. Critical status strip — the first thing read
+   -------------------------------------------------------------------------- */
+.status-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--rhc-space-3);
+    padding: var(--rhc-space-2) var(--rhc-space-3);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-left: 3px solid var(--rhc-success);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-1);
+}
+
+.status-strip[data-severity="warning"] {
+    border-left-color: var(--rhc-warning);
+}
+
+.status-strip[data-severity="critical"] {
+    border-left-color: var(--rhc-danger);
+}
+
+.status-strip-primary {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    font-size: var(--rhc-text-md);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.status-strip-detail {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.status-strip-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--rhc-border);
+}
+
+.status-strip-trailing {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    margin-left: auto;
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   4. Executive KPI cards
+   -------------------------------------------------------------------------- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+}
+
+.kpi-card {
     display: flex;
     flex-direction: column;
+    gap: var(--rhc-space-1);
+    padding: var(--rhc-space-3);
     background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-1);
+    transition: border-color var(--rhc-duration) var(--rhc-ease),
+                box-shadow var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease);
+}
+
+.kpi-card:hover {
+    border-color: var(--rhc-border-strong);
+    box-shadow: var(--rhc-shadow-2);
+    transform: translateY(-1px);
+}
+
+.kpi-head {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+}
+
+/* Icons are monochrome by default; colour is reserved for state. */
+.kpi-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.kpi-icon-primary { color: var(--rhc-primary); background: var(--rhc-primary-subtle); }
+.kpi-icon-success { color: var(--rhc-success); background: var(--rhc-success-subtle); }
+.kpi-icon-warning { color: var(--rhc-warning); background: var(--rhc-warning-subtle); }
+.kpi-icon-danger { color: var(--rhc-danger); background: var(--rhc-danger-subtle); }
+
+.kpi-label {
+    font-size: var(--rhc-text-base);
+    font-weight: var(--rhc-weight-medium);
+    color: var(--rhc-text-secondary);
+}
+
+.kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-1);
+}
+
+.kpi-value {
+    font-size: var(--rhc-text-3xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-unit {
+    font-size: var(--rhc-text-md);
+    color: var(--rhc-text-tertiary);
+}
+
+.kpi-support {
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+}
+
+.kpi-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    margin-top: auto;
+    padding-top: var(--rhc-space-1);
+    border-top: 1px solid var(--rhc-divider);
+}
+
+.kpi-timestamp {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+.kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.kpi-trend-up { color: var(--rhc-success); }
+.kpi-trend-down { color: var(--rhc-danger); }
+.kpi-trend-flat { color: var(--rhc-text-tertiary); }
+
+/* Executive mode enlarges the numbers for presentation distance. */
+.app-shell[data-workspace="executive"] .kpi-value {
+    font-size: var(--rhc-text-4xl);
+}
+
+.app-shell[data-workspace="executive"] .kpi-card {
+    padding: var(--rhc-space-4) var(--rhc-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   5. Executive summary panel
+   -------------------------------------------------------------------------- */
+.exec-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--rhc-space-3);
+    align-items: center;
+    padding: var(--rhc-space-3);
+    background: linear-gradient(180deg, var(--rhc-surface), var(--rhc-surface-alt));
     border: 1px solid var(--rhc-border);
     border-radius: var(--rhc-radius-lg);
     box-shadow: var(--rhc-shadow-1);
 }
 
-.rhc-card-header {
+.exec-summary-heading {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-2);
+}
+
+.exec-summary-title {
+    font-size: var(--rhc-text-lg);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.exec-summary-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rhc-space-1) var(--rhc-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.exec-summary-item {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    font-size: var(--rhc-text-md);
+    color: var(--rhc-text-secondary);
+}
+
+.exec-summary-item strong {
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-text);
+}
+
+.exec-summary-check {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+    border-radius: 50%;
+}
+
+.exec-summary-check-warning {
+    color: var(--rhc-warning);
+    background: var(--rhc-warning-subtle);
+}
+
+.exec-summary-check-danger {
+    color: var(--rhc-danger);
+    background: var(--rhc-danger-subtle);
+}
+
+.exec-summary-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--rhc-space-half);
+    padding-left: var(--rhc-space-3);
+    border-left: 1px solid var(--rhc-border);
+    text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   6. Map hero
+   -------------------------------------------------------------------------- */
+.map-hero {
+    position: relative;
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    background: var(--rhc-surface);
+    box-shadow: var(--rhc-shadow-2);
+    overflow: hidden;
+}
+
+/* Header floats over the canvas so the map keeps its full height. */
+.map-hero-header {
+    position: absolute;
+    top: var(--rhc-space-2);
+    left: var(--rhc-space-2);
+    right: var(--rhc-space-2);
+    z-index: 3;
     display: flex;
     align-items: center;
     gap: var(--rhc-space-2);
-    flex-shrink: 0;
-    padding: var(--rhc-space-2) var(--rhc-space-2);
-    border-bottom: 1px solid var(--rhc-divider);
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
+    box-shadow: var(--rhc-shadow-1);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
 }
 
-.rhc-card-heading {
+.map-hero-header > * {
+    pointer-events: auto;
+}
+
+.map-hero-heading {
     display: flex;
     flex-direction: column;
     min-width: 0;
     line-height: 1.3;
 }
 
-.rhc-card-title {
+.map-hero-title {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
     font-size: var(--rhc-text-md);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
 }
 
-.rhc-card-subtitle {
+.map-hero-subtitle {
     font-size: var(--rhc-text-sm);
     color: var(--rhc-text-secondary);
 }
 
-.rhc-card-tools {
+.map-hero-tools {
     display: flex;
     align-items: center;
     gap: var(--rhc-space-half);
     margin-left: auto;
 }
 
-.rhc-card-body {
-    padding: var(--rhc-space-2);
-}
-
-.rhc-card-body-flush {
-    padding: 0;
-}
-
-.rhc-card-footer {
-    padding: var(--rhc-space-1) var(--rhc-space-2);
-    border-top: 1px solid var(--rhc-divider);
-}
-
-/* --------------------------------------------------------------------------
-   2. Prototype notice
-   -------------------------------------------------------------------------- */
-.rhc-notice {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--rhc-space-1);
-    margin-bottom: var(--rhc-space-3);
-    padding: var(--rhc-space-1) var(--rhc-space-2);
-    font-size: var(--rhc-text-base);
-    color: var(--rhc-text-secondary);
-    background: var(--rhc-warning-subtle);
-    border: 1px solid #F7E3BE;
-    border-radius: var(--rhc-radius-md);
-}
-
-.rhc-notice-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-    color: var(--rhc-warning);
-}
-
-.rhc-notice strong {
-    color: var(--rhc-text);
-    font-weight: 600;
-}
-
-/* --------------------------------------------------------------------------
-   3. Metric cards
-   -------------------------------------------------------------------------- */
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--rhc-space-2);
-    margin-bottom: var(--rhc-space-3);
-}
-
-.metric-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--rhc-space-2);
-    padding: var(--rhc-space-2);
-    background: var(--rhc-surface);
-    border: 1px solid var(--rhc-border);
-    border-radius: var(--rhc-radius-md);
-    box-shadow: var(--rhc-shadow-1);
-    transition: border-color var(--rhc-duration) var(--rhc-ease), box-shadow var(--rhc-duration) var(--rhc-ease);
-}
-
-.metric-card:hover {
-    border-color: var(--rhc-border-strong);
-    box-shadow: var(--rhc-shadow-2);
-}
-
-.metric-icon {
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    font-size: var(--rhc-text-md);
-    border-radius: var(--rhc-radius-sm);
-}
-
-.metric-icon-primary {
-    color: var(--rhc-primary);
-    background: var(--rhc-primary-subtle);
-}
-
-.metric-icon-success {
-    color: var(--rhc-success);
-    background: var(--rhc-success-subtle);
-}
-
-.metric-icon-info {
-    color: var(--rhc-info);
-    background: var(--rhc-info-subtle);
-}
-
-.metric-icon-accent {
-    color: var(--rhc-type-district);
-    background: #F3EFF9;
-}
-
-.metric-content {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 2px;
-}
-
-.metric-label {
-    font-size: var(--rhc-text-sm);
-    font-weight: 500;
-    color: var(--rhc-text-secondary);
-}
-
-.metric-value-row {
-    display: flex;
-    align-items: baseline;
-    gap: var(--rhc-space-1);
-}
-
-.metric-value {
-    font-size: var(--rhc-text-2xl);
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-}
-
-.metric-trend {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: var(--rhc-text-xs);
-    font-weight: 600;
-}
-
-.metric-trend-up {
-    color: var(--rhc-success);
-}
-
-.metric-trend-down {
-    color: var(--rhc-danger);
-}
-
-.metric-trend-flat {
-    color: var(--rhc-text-tertiary);
-}
-
-.metric-caption {
-    font-size: var(--rhc-text-xs);
-    color: var(--rhc-text-tertiary);
-}
-
-/* --------------------------------------------------------------------------
-   4. Main dashboard layout
-   -------------------------------------------------------------------------- */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: var(--rhc-space-2);
-    margin-bottom: var(--rhc-space-3);
-}
-
-/* --------------------------------------------------------------------------
-   5. Map card
-   -------------------------------------------------------------------------- */
-.map-card {
-    min-width: 0;
-}
-
 .map-shell {
     position: relative;
-    height: 520px;
-    border-radius: 0 0 var(--rhc-radius-lg) var(--rhc-radius-lg);
-    overflow: hidden;
+    height: 600px;
+}
+
+/* The map is the hero in executive mode. */
+.app-shell[data-workspace="executive"] .map-shell {
+    height: min(72vh, 780px);
 }
 
 .map-canvas {
@@ -225,7 +398,7 @@
     inset: 0;
 }
 
-/* MapLibre control chrome, restyled to match the Fluent surface. */
+/* MapLibre chrome restyled to match the surface. */
 .map-shell .maplibregl-ctrl-group {
     background: var(--rhc-surface);
     border: 1px solid var(--rhc-border);
@@ -237,9 +410,13 @@
     border-top: 1px solid var(--rhc-divider);
 }
 
+.map-shell .maplibregl-ctrl-top-right {
+    top: 58px;
+}
+
 .map-shell .maplibregl-ctrl-attrib {
     font-size: 10px;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.86);
     border-radius: var(--rhc-radius-sm) 0 0 0;
 }
 
@@ -247,54 +424,6 @@
     color: var(--rhc-text-secondary);
 }
 
-/* Facility markers — flat pins, no glow. */
-.map-marker {
-    display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    font-size: 11px;
-    color: var(--rhc-text-inverse);
-    background: var(--rhc-type-public);
-    border: 2px solid var(--rhc-surface);
-    border-radius: 50%;
-    box-shadow: var(--rhc-shadow-2);
-    cursor: pointer;
-    transition: transform var(--rhc-duration) var(--rhc-ease);
-}
-
-.map-marker:hover {
-    transform: scale(1.15);
-}
-
-.map-marker:focus-visible {
-    outline: 2px solid var(--rhc-primary);
-    outline-offset: 2px;
-}
-
-.map-marker.is-selected {
-    transform: scale(1.25);
-    border-color: var(--rhc-primary);
-    box-shadow: var(--rhc-shadow-3);
-}
-
-.map-marker-public {
-    background: var(--rhc-type-public);
-}
-
-.map-marker-district {
-    background: var(--rhc-type-district);
-}
-
-.map-marker-rhu {
-    background: var(--rhc-type-rhu);
-}
-
-.map-marker-private {
-    background: var(--rhc-type-private);
-}
-
-/* Shown in place of the canvas when MapLibre cannot be reached. */
 .map-unavailable {
     display: grid;
     place-items: center;
@@ -306,26 +435,144 @@
     background: var(--rhc-surface-alt);
 }
 
-/* Legend overlay */
+/* --------------------------------------------------------------------------
+   7. Map markers — state is communicated, not decorated
+   --------------------------------------------------------------------------
+
+   MapLibre writes an inline `transform` on the marker element to position it,
+   which would override any transform declared here. All visual treatment and
+   motion therefore lives on the inner .map-marker-shape, which MapLibre
+   never touches. */
+.map-marker {
+    display: block;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.map-marker-shape {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 11px;
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-type-public);
+    border: 2px solid var(--rhc-surface);
+    border-radius: 50%;
+    box-shadow: var(--rhc-shadow-1);
+    transition: transform var(--rhc-duration) var(--rhc-ease-out),
+                box-shadow var(--rhc-duration) var(--rhc-ease);
+}
+
+.map-marker:hover {
+    z-index: 2;
+}
+
+.map-marker:hover .map-marker-shape {
+    transform: scale(1.18) translateY(-1px);
+    box-shadow: var(--rhc-shadow-3);
+}
+
+.map-marker:focus-visible {
+    outline: none;
+}
+
+.map-marker:focus-visible .map-marker-shape {
+    outline: 2px solid var(--rhc-primary);
+    outline-offset: 3px;
+}
+
+.map-marker-public .map-marker-shape { background: var(--rhc-type-public); }
+.map-marker-district .map-marker-shape { background: var(--rhc-type-district); }
+.map-marker-rhu .map-marker-shape { background: var(--rhc-type-rhu); }
+.map-marker-private .map-marker-shape { background: var(--rhc-type-private); }
+
+/* Reporting facilities breathe slowly so the network reads as alive. */
+.map-marker.is-online .map-marker-shape::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.18;
+    animation: marker-breathe 3.6s var(--rhc-ease) infinite;
+}
+
+@keyframes marker-breathe {
+    0%, 100% { transform: scale(0.9); opacity: 0.12; }
+    50% { transform: scale(1.12); opacity: 0.24; }
+}
+
+/* Emergency-capable facilities carry a slow red pulse. */
+.map-marker.is-emergency .map-marker-shape::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border: 1.5px solid var(--rhc-danger);
+    border-radius: 50%;
+    opacity: 0;
+    animation: marker-pulse 2.6s var(--rhc-ease) infinite;
+}
+
+@keyframes marker-pulse {
+    0% { opacity: 0.55; transform: scale(0.85); }
+    70% { opacity: 0; transform: scale(1.5); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Selection: a soft halo plus a small lift. */
+.map-marker.is-selected {
+    z-index: 3;
+}
+
+.map-marker.is-selected .map-marker-shape {
+    transform: scale(1.2);
+    border-color: var(--rhc-primary);
+    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.18), var(--rhc-shadow-3);
+}
+
+/* Markers fanned apart because neighbours would overlap at this zoom. The
+   heavier ring signals the position is approximate until you zoom in. */
+.map-marker.is-fanned .map-marker-shape {
+    border-style: dashed;
+    border-color: var(--rhc-surface);
+    box-shadow: 0 0 0 1px var(--rhc-border-strong), var(--rhc-shadow-1);
+}
+
+.map-marker.is-offline .map-marker-shape {
+    background: var(--rhc-text-tertiary);
+    opacity: 0.7;
+}
+
+.map-marker.is-offline .map-marker-shape::before {
+    animation: none;
+}
+
+/* Legend */
 .map-legend {
     position: absolute;
     left: var(--rhc-space-2);
     bottom: var(--rhc-space-2);
     z-index: 2;
-    min-width: 168px;
-    padding: var(--rhc-space-1) var(--rhc-space-2) var(--rhc-space-2);
-    background: rgba(255, 255, 255, 0.96);
+    min-width: 176px;
+    padding: var(--rhc-space-2);
+    background: rgba(255, 255, 255, 0.94);
     border: 1px solid var(--rhc-border);
     border-radius: var(--rhc-radius-md);
     box-shadow: var(--rhc-shadow-2);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(8px);
 }
 
 .map-legend-title {
     margin-bottom: var(--rhc-space-1);
     font-size: var(--rhc-text-xs);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--rhc-text-tertiary);
 }
@@ -333,7 +580,7 @@
 .map-legend-list {
     display: flex;
     flex-direction: column;
-    gap: var(--rhc-space-half);
+    gap: 5px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -354,24 +601,36 @@
     border-radius: 50%;
 }
 
-.map-legend-swatch-public {
-    background: var(--rhc-type-public);
+.map-legend-swatch-public { background: var(--rhc-type-public); }
+.map-legend-swatch-district { background: var(--rhc-type-district); }
+.map-legend-swatch-rhu { background: var(--rhc-type-rhu); }
+.map-legend-swatch-private { background: var(--rhc-type-private); }
+
+.map-legend-note {
+    margin-top: var(--rhc-space-1);
+    padding-top: var(--rhc-space-1);
+    border-top: 1px solid var(--rhc-divider);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
 }
 
-.map-legend-swatch-district {
-    background: var(--rhc-type-district);
+/* Referral flow key, executive mode only. */
+.map-flow-key {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
 }
 
-.map-legend-swatch-rhu {
-    background: var(--rhc-type-rhu);
-}
-
-.map-legend-swatch-private {
-    background: var(--rhc-type-private);
+.map-flow-line {
+    width: 18px;
+    height: 0;
+    border-top: 2px dashed var(--rhc-primary);
 }
 
 /* --------------------------------------------------------------------------
-   6. Right overview panel
+   8. Operational side panel
    -------------------------------------------------------------------------- */
 .overview-panel {
     display: flex;
@@ -380,25 +639,21 @@
     min-width: 0;
 }
 
-.overview-section + .overview-section {
-    border-top: 1px solid var(--rhc-divider);
-}
-
 .overview-section-title {
     display: flex;
     align-items: center;
     gap: var(--rhc-space-1);
-    padding: var(--rhc-space-2) var(--rhc-space-2) var(--rhc-space-1);
-    font-size: var(--rhc-text-sm);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    padding: var(--rhc-space-2) var(--rhc-space-3) var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--rhc-text-tertiary);
 }
 
 .stat-list {
     margin: 0;
-    padding: 0 var(--rhc-space-2) var(--rhc-space-2);
+    padding: 0 var(--rhc-space-3) var(--rhc-space-2);
     list-style: none;
 }
 
@@ -406,7 +661,7 @@
     display: flex;
     align-items: center;
     gap: var(--rhc-space-1);
-    padding: var(--rhc-space-1) 0;
+    padding: 9px 0;
     font-size: var(--rhc-text-base);
 }
 
@@ -423,17 +678,17 @@
 
 .stat-row-value {
     margin-left: auto;
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
+    font-variant-numeric: tabular-nums;
     color: var(--rhc-text);
     white-space: nowrap;
 }
 
 .stat-row-value-muted {
-    font-weight: 400;
+    font-weight: var(--rhc-weight-regular);
     color: var(--rhc-text-secondary);
 }
 
-/* Small colour key used in the availability list. */
 .stat-dot {
     flex-shrink: 0;
     width: 8px;
@@ -441,231 +696,50 @@
     border-radius: 50%;
 }
 
-.stat-dot-success {
-    background: var(--rhc-success);
-}
+.stat-dot-success { background: var(--rhc-success); }
+.stat-dot-warning { background: var(--rhc-warning); }
+.stat-dot-danger { background: var(--rhc-danger); }
+.stat-dot-neutral { background: var(--rhc-text-tertiary); }
 
-.stat-dot-warning {
-    background: var(--rhc-warning);
-}
-
-.stat-dot-danger {
-    background: var(--rhc-danger);
-}
-
-.stat-dot-neutral {
-    background: var(--rhc-text-tertiary);
-}
-
-/* Pulsing presence indicator for the network status row. */
 .status-live {
     display: inline-flex;
     align-items: center;
     gap: var(--rhc-space-1);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-success);
 }
 
-.status-live-dot {
-    position: relative;
-    width: 8px;
-    height: 8px;
-    background: var(--rhc-success);
-    border-radius: 50%;
-}
-
-.status-live-dot::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    border: 1px solid var(--rhc-success);
-    border-radius: 50%;
-    opacity: 0.4;
-}
-
-/* --------------------------------------------------------------------------
-   7. Status badges
-   -------------------------------------------------------------------------- */
-.rhc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--rhc-space-half);
-    padding: 2px var(--rhc-space-1);
-    font-size: var(--rhc-text-xs);
-    font-weight: 600;
-    line-height: 16px;
-    white-space: nowrap;
-    border-radius: var(--rhc-radius-sm);
-}
-
-.rhc-badge-success {
-    color: var(--rhc-success);
-    background: var(--rhc-success-subtle);
-}
-
-.rhc-badge-warning {
-    color: #8A5A00;
-    background: var(--rhc-warning-subtle);
-}
-
-.rhc-badge-danger {
-    color: var(--rhc-danger);
-    background: var(--rhc-danger-subtle);
-}
-
-.rhc-badge-info {
-    color: var(--rhc-info);
-    background: var(--rhc-info-subtle);
-}
-
-.rhc-badge-neutral {
-    color: var(--rhc-text-secondary);
-    background: var(--rhc-neutral-subtle);
-}
-
-/* --------------------------------------------------------------------------
-   8. Bottom section — tables
-   -------------------------------------------------------------------------- */
-.bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--rhc-space-2);
-}
-
-.rhc-table-wrap {
-    overflow-x: auto;
-}
-
-.rhc-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--rhc-text-base);
-}
-
-.rhc-table th,
-.rhc-table td {
-    padding: var(--rhc-space-1) var(--rhc-space-2);
-    text-align: left;
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-.rhc-table thead th {
-    font-size: var(--rhc-text-xs);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--rhc-text-tertiary);
-    background: var(--rhc-surface-alt);
-    border-bottom: 1px solid var(--rhc-border);
-}
-
-.rhc-table tbody tr {
-    border-bottom: 1px solid var(--rhc-divider);
-    transition: background-color var(--rhc-duration) var(--rhc-ease);
-}
-
-.rhc-table tbody tr:last-child {
-    border-bottom: 0;
-}
-
-.rhc-table tbody tr:hover {
-    background: var(--rhc-surface-alt);
-}
-
-.rhc-table td {
-    color: var(--rhc-text);
-}
-
-.cell-strong {
-    font-weight: 600;
-}
-
-.cell-muted {
-    color: var(--rhc-text-secondary);
-}
-
-.cell-mono {
-    font-family: var(--rhc-font-mono);
-    font-size: var(--rhc-text-sm);
-}
-
-/* Two-line cell: primary label above a secondary detail. */
-.cell-stack {
+/* Horizontal share bar used for availability splits. */
+.share-bar {
     display: flex;
-    flex-direction: column;
-    line-height: 1.35;
-}
-
-.cell-stack-sub {
-    font-size: var(--rhc-text-xs);
-    color: var(--rhc-text-tertiary);
-}
-
-.cell-numeric {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-/* Referral origin → destination pair. */
-.route-cell {
-    display: flex;
-    align-items: center;
-    gap: var(--rhc-space-half);
-    font-size: var(--rhc-text-sm);
-}
-
-.route-arrow {
-    color: var(--rhc-text-tertiary);
-    font-size: 10px;
-}
-
-/* Bed availability meter. */
-.bed-meter {
-    display: flex;
-    align-items: center;
-    gap: var(--rhc-space-1);
-}
-
-.bed-meter-track {
-    width: 44px;
-    height: 4px;
-    background: var(--rhc-neutral-subtle);
-    border-radius: var(--rhc-radius-pill);
+    height: 6px;
+    margin-top: var(--rhc-space-1);
     overflow: hidden;
-}
-
-.bed-meter-fill {
-    height: 100%;
-    background: var(--rhc-success);
+    background: var(--rhc-neutral-subtle);
     border-radius: var(--rhc-radius-pill);
 }
 
-.bed-meter-fill-warning {
-    background: var(--rhc-warning);
+.share-bar-part {
+    height: 100%;
+    transition: width var(--rhc-duration-slower) var(--rhc-ease-out);
 }
 
-.bed-meter-fill-danger {
-    background: var(--rhc-danger);
-}
-
-.bed-meter-text {
-    font-size: var(--rhc-text-sm);
-    font-variant-numeric: tabular-nums;
-    color: var(--rhc-text-secondary);
-}
+.share-bar-success { background: var(--rhc-success); }
+.share-bar-warning { background: var(--rhc-warning); }
+.share-bar-neutral { background: var(--rhc-border-strong); }
 
 /* --------------------------------------------------------------------------
-   9. Hospital details drawer
+   11. Facility drawer — the operational hub
    -------------------------------------------------------------------------- */
 .drawer-backdrop {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background: rgba(27, 26, 25, 0.24);
+    background: rgba(22, 24, 29, 0.24);
     opacity: 0;
     visibility: hidden;
-    transition: opacity var(--rhc-duration-slow) var(--rhc-ease), visibility var(--rhc-duration-slow);
+    transition: opacity var(--rhc-duration-slow) var(--rhc-ease),
+                visibility var(--rhc-duration-slow);
 }
 
 .drawer-backdrop.is-open {
@@ -685,10 +759,11 @@
     max-width: 100vw;
     background: var(--rhc-surface);
     border-left: 1px solid var(--rhc-border);
-    box-shadow: var(--rhc-shadow-3);
+    box-shadow: var(--rhc-shadow-4);
     transform: translateX(100%);
     visibility: hidden;
-    transition: transform var(--rhc-duration-slow) var(--rhc-ease), visibility var(--rhc-duration-slow);
+    transition: transform var(--rhc-duration-slow) var(--rhc-ease-out),
+                visibility var(--rhc-duration-slow);
 }
 
 .hospital-drawer.is-open {
@@ -696,23 +771,46 @@
     visibility: visible;
 }
 
+/* Header carries the identity and status of the facility. */
 .drawer-header {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--rhc-space-2);
     flex-shrink: 0;
-    padding: var(--rhc-space-2);
+    padding: var(--rhc-space-3);
+    background: var(--rhc-surface-alt);
     border-bottom: 1px solid var(--rhc-border);
 }
 
+.drawer-header-top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-2);
+}
+
+.drawer-type-mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    font-size: var(--rhc-text-lg);
+    color: var(--rhc-text-inverse);
+    border-radius: var(--rhc-radius-md);
+}
+
+.drawer-type-public { background: var(--rhc-type-public); }
+.drawer-type-district { background: var(--rhc-type-district); }
+.drawer-type-rhu { background: var(--rhc-type-rhu); }
+.drawer-type-private { background: var(--rhc-type-private); }
+
 .drawer-header-text {
     min-width: 0;
+    flex: 1;
 }
 
 .drawer-title {
-    font-size: var(--rhc-text-lg);
-    font-weight: 600;
-    line-height: 1.3;
+    font-size: var(--rhc-text-xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
 }
 
 .drawer-subtitle {
@@ -725,8 +823,14 @@
 }
 
 .drawer-close {
-    margin-left: auto;
     flex-shrink: 0;
+}
+
+.drawer-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rhc-space-half);
+    margin-top: var(--rhc-space-2);
 }
 
 .drawer-body {
@@ -735,7 +839,7 @@
 }
 
 .drawer-section {
-    padding: var(--rhc-space-2);
+    padding: var(--rhc-space-3);
 }
 
 .drawer-section + .drawer-section {
@@ -743,41 +847,75 @@
 }
 
 .drawer-section-label {
-    margin-bottom: var(--rhc-space-1);
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-2);
     font-size: var(--rhc-text-xs);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--rhc-text-tertiary);
 }
 
-/* Compact label/value information rows. */
-.info-list {
-    margin: 0;
+/* Occupancy block */
+.occupancy {
+    padding: var(--rhc-space-2);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-md);
 }
 
-.info-row {
+.occupancy-head {
     display: flex;
     align-items: baseline;
-    gap: var(--rhc-space-2);
-    padding: var(--rhc-space-half) 0;
-    font-size: var(--rhc-text-base);
+    gap: var(--rhc-space-1);
+    margin-bottom: var(--rhc-space-1);
 }
 
-.info-row-label {
-    flex-shrink: 0;
-    width: 116px;
+.occupancy-value {
+    font-size: var(--rhc-text-2xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.occupancy-total {
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-tertiary);
+}
+
+.occupancy-pct {
+    margin-left: auto;
+    font-size: var(--rhc-text-sm);
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-text-secondary);
 }
 
-.info-row-value {
-    margin: 0;
-    min-width: 0;
-    font-weight: 500;
-    color: var(--rhc-text);
+.occupancy-track {
+    height: 8px;
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-pill);
+    overflow: hidden;
 }
 
-/* Availability figures shown as a small tile pair. */
+.occupancy-fill {
+    height: 100%;
+    background: var(--rhc-success);
+    border-radius: var(--rhc-radius-pill);
+    transition: width var(--rhc-duration-slower) var(--rhc-ease-out);
+}
+
+.occupancy-fill-warning { background: var(--rhc-warning); }
+.occupancy-fill-danger { background: var(--rhc-danger); }
+
+.occupancy-note {
+    margin-top: var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* Metric pair inside the drawer */
 .drawer-stat-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -785,7 +923,7 @@
 }
 
 .drawer-stat {
-    padding: var(--rhc-space-1) var(--rhc-space-2);
+    padding: var(--rhc-space-2);
     background: var(--rhc-surface-alt);
     border: 1px solid var(--rhc-border);
     border-radius: var(--rhc-radius-md);
@@ -793,8 +931,9 @@
 
 .drawer-stat-value {
     font-size: var(--rhc-text-xl);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     line-height: 1.2;
+    font-variant-numeric: tabular-nums;
 }
 
 .drawer-stat-label {
@@ -802,33 +941,114 @@
     color: var(--rhc-text-secondary);
 }
 
-.chip-group {
+/* Today's activity rows */
+.activity-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--rhc-space-half);
+    flex-direction: column;
+    gap: var(--rhc-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.rhc-chip {
-    display: inline-flex;
+.activity-row {
+    display: flex;
     align-items: center;
-    padding: 3px var(--rhc-space-1);
+    gap: var(--rhc-space-2);
+    font-size: var(--rhc-text-base);
+}
+
+.activity-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
     font-size: var(--rhc-text-sm);
     color: var(--rhc-text-secondary);
-    background: var(--rhc-surface-alt);
-    border: 1px solid var(--rhc-border);
-    border-radius: var(--rhc-radius-pill);
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.activity-label {
+    color: var(--rhc-text-secondary);
+}
+
+.activity-value {
+    margin-left: auto;
+    font-weight: var(--rhc-weight-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Quick actions grid */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--rhc-space-1);
+}
+
+.quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rhc-space-half);
+    padding: var(--rhc-space-2) var(--rhc-space-1);
+    font-family: inherit;
+    font-size: var(--rhc-text-sm);
+    font-weight: var(--rhc-weight-medium);
+    color: var(--rhc-text);
+    text-align: center;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border-strong);
+    border-radius: var(--rhc-radius-md);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration) var(--rhc-ease),
+                border-color var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease);
+}
+
+.quick-action:hover {
+    background: var(--rhc-surface-hover);
+    border-color: var(--rhc-text-tertiary);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: var(--rhc-text);
+}
+
+.quick-action:active {
+    transform: none;
+}
+
+.quick-action-icon {
+    font-size: var(--rhc-text-lg);
+    color: var(--rhc-text-secondary);
+}
+
+.quick-action-primary {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary);
+    border-color: var(--rhc-primary);
+}
+
+.quick-action-primary:hover {
+    color: var(--rhc-text-inverse);
+    background: var(--rhc-primary-hover);
+    border-color: var(--rhc-primary-hover);
+}
+
+.quick-action-primary .quick-action-icon {
+    color: var(--rhc-text-inverse);
 }
 
 .drawer-footer {
     display: flex;
+    align-items: center;
     gap: var(--rhc-space-1);
     flex-shrink: 0;
-    padding: var(--rhc-space-2);
+    padding: var(--rhc-space-2) var(--rhc-space-3);
+    background: var(--rhc-surface-alt);
     border-top: 1px solid var(--rhc-border);
-}
-
-.drawer-footer .rhc-btn {
-    flex: 1;
 }
 
 .drawer-updated {
@@ -840,16 +1060,39 @@
 }
 
 /* --------------------------------------------------------------------------
-   10. Responsive behaviour
+   13. Layout grids
    -------------------------------------------------------------------------- */
-@media (max-width: 1400px) {
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--rhc-space-2);
+    align-items: start;
+}
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--rhc-space-2);
+}
+
+/* --------------------------------------------------------------------------
+   14. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1500px) {
     .dashboard-grid {
-        grid-template-columns: minmax(0, 1fr) 296px;
+        grid-template-columns: minmax(0, 1fr) 312px;
+    }
+
+    .kpi-value {
+        font-size: var(--rhc-text-2xl);
     }
 }
 
-/* Tablet — map goes full width, overview drops beneath it. */
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .dashboard-grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -860,11 +1103,6 @@
         gap: var(--rhc-space-2);
     }
 
-    /* Section dividers become card borders once the panel is a grid. */
-    .overview-section + .overview-section {
-        border-top: 0;
-    }
-
     .bottom-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -873,20 +1111,28 @@
         grid-column: span 2;
     }
 
-    .metric-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .map-shell,
+    .app-shell[data-workspace="executive"] .map-shell {
+        height: 480px;
     }
 
-    .map-shell {
-        height: 440px;
+    .exec-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .exec-summary-aside {
+        align-items: flex-start;
+        padding-left: 0;
+        padding-top: var(--rhc-space-2);
+        border-left: 0;
+        border-top: 1px solid var(--rhc-border);
+        text-align: left;
+        width: 100%;
     }
 }
 
 @media (max-width: 900px) {
-    .overview-panel {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
+    .overview-panel,
     .bottom-grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -896,25 +1142,51 @@
     }
 }
 
-/* Mobile — horizontally scrollable metrics, drawer becomes a bottom sheet. */
 @media (max-width: 720px) {
-    .metric-grid {
+    .kpi-grid {
         display: flex;
         gap: var(--rhc-space-1);
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        margin-left: calc(-1 * var(--rhc-space-1));
-        margin-right: calc(-1 * var(--rhc-space-1));
+        margin: 0 calc(-1 * var(--rhc-space-1));
         padding: 0 var(--rhc-space-1) var(--rhc-space-1);
     }
 
-    .metric-card {
-        flex: 0 0 216px;
+    .kpi-card {
+        flex: 0 0 232px;
         scroll-snap-align: start;
     }
 
-    .map-shell {
-        height: 380px;
+    .status-strip {
+        gap: var(--rhc-space-1);
+    }
+
+    .status-strip-divider {
+        display: none;
+    }
+
+    .status-strip-trailing {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .map-shell,
+    .app-shell[data-workspace="executive"] .map-shell {
+        height: 400px;
+    }
+
+    .map-hero-header {
+        position: static;
+        border: 0;
+        border-bottom: 1px solid var(--rhc-divider);
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        background: var(--rhc-surface);
+    }
+
+    .map-shell .maplibregl-ctrl-top-right {
+        top: 0;
     }
 
     .map-legend {
@@ -928,11 +1200,12 @@
         font-size: var(--rhc-text-xs);
     }
 
+    /* Drawer becomes a bottom sheet. */
     .hospital-drawer {
         top: auto;
         left: 0;
         width: 100%;
-        max-height: 86vh;
+        max-height: 88vh;
         border-left: 0;
         border-top-left-radius: var(--rhc-radius-lg);
         border-top-right-radius: var(--rhc-radius-lg);
@@ -943,24 +1216,25 @@
         transform: translateY(0);
     }
 
-    /* Grab handle affordance for the bottom sheet. */
     .hospital-drawer::before {
         content: "";
         position: absolute;
         top: var(--rhc-space-1);
         left: 50%;
-        width: 32px;
+        width: 36px;
         height: 4px;
         background: var(--rhc-border-strong);
         border-radius: var(--rhc-radius-pill);
         transform: translateX(-50%);
+        z-index: 1;
     }
 
     .drawer-header {
-        padding-top: var(--rhc-space-3);
+        padding-top: var(--rhc-space-4);
     }
 
-    .info-row-label {
-        width: 100px;
+    /* Touch-friendly map and action targets. */
+    .quick-action {
+        padding: var(--rhc-space-3) var(--rhc-space-1);
     }
 }

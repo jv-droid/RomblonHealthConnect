@@ -96,9 +96,10 @@
     transition: border-color var(--rhc-duration) var(--rhc-ease), box-shadow var(--rhc-duration) var(--rhc-ease);
 }
 
+/* Matches the 34px control height used by .rhc-btn so rows align. */
 .rhc-input,
 .rhc-select {
-    height: 32px;
+    height: 34px;
 }
 
 .rhc-textarea {

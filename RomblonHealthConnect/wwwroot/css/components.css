@@ -1,0 +1,401 @@
+/* ==========================================================================
+   Romblon HealthConnect — Shared components
+   Primitives used by every module: cards, badges, chips, tables, metric tiles,
+   and definition rows. Loaded globally from _Layout so any view can rely on them.
+
+   Module-specific composition lives in dashboard.css and referrals.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Card
+   -------------------------------------------------------------------------- */
+.rhc-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-1);
+}
+
+.rhc-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    padding: var(--rhc-space-2) var(--rhc-space-3);
+    border-bottom: 1px solid var(--rhc-divider);
+}
+
+.rhc-card-heading {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.35;
+}
+
+.rhc-card-title {
+    font-size: var(--rhc-text-md);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.rhc-card-subtitle {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.rhc-card-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    margin-left: auto;
+}
+
+.rhc-card-body {
+    padding: var(--rhc-space-3);
+}
+
+.rhc-card-body-flush {
+    padding: 0;
+}
+
+.rhc-card-footer {
+    padding: var(--rhc-space-1) var(--rhc-space-3);
+    border-top: 1px solid var(--rhc-divider);
+}
+
+/* --------------------------------------------------------------------------
+   2. Badges and chips
+   -------------------------------------------------------------------------- */
+.rhc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    padding: 2px var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 16px;
+    white-space: nowrap;
+    border-radius: var(--rhc-radius-sm);
+}
+
+.rhc-badge-success {
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+    box-shadow: inset 0 0 0 1px var(--rhc-success-border);
+}
+
+.rhc-badge-warning {
+    color: var(--rhc-warning);
+    background: var(--rhc-warning-subtle);
+    box-shadow: inset 0 0 0 1px var(--rhc-warning-border);
+}
+
+.rhc-badge-danger {
+    color: var(--rhc-danger);
+    background: var(--rhc-danger-subtle);
+    box-shadow: inset 0 0 0 1px var(--rhc-danger-border);
+}
+
+.rhc-badge-info {
+    color: var(--rhc-info);
+    background: var(--rhc-info-subtle);
+    box-shadow: inset 0 0 0 1px #CBE1F3;
+}
+
+.rhc-badge-neutral {
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    box-shadow: inset 0 0 0 1px var(--rhc-border);
+}
+
+.rhc-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-surface-alt);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-pill);
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rhc-space-half);
+}
+
+/* --------------------------------------------------------------------------
+   3. Metric tile
+   -------------------------------------------------------------------------- */
+.metric-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rhc-space-2);
+    padding: var(--rhc-space-3);
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-1);
+    transition: border-color var(--rhc-duration) var(--rhc-ease),
+                box-shadow var(--rhc-duration) var(--rhc-ease),
+                transform var(--rhc-duration) var(--rhc-ease);
+}
+
+.metric-card:hover {
+    border-color: var(--rhc-border-strong);
+    box-shadow: var(--rhc-shadow-2);
+    transform: translateY(-1px);
+}
+
+.metric-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.metric-icon-primary { color: var(--rhc-primary); background: var(--rhc-primary-subtle); }
+.metric-icon-success { color: var(--rhc-success); background: var(--rhc-success-subtle); }
+.metric-icon-info { color: var(--rhc-info); background: var(--rhc-info-subtle); }
+.metric-icon-accent { color: var(--rhc-type-district); background: #F3EFF9; }
+
+.metric-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.metric-label {
+    font-size: var(--rhc-text-sm);
+    font-weight: var(--rhc-weight-medium);
+    color: var(--rhc-text-secondary);
+}
+
+.metric-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-1);
+}
+
+.metric-value {
+    font-size: var(--rhc-text-2xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+}
+
+.metric-trend-up { color: var(--rhc-success); }
+.metric-trend-down { color: var(--rhc-danger); }
+.metric-trend-flat { color: var(--rhc-text-tertiary); }
+
+.metric-caption {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+/* --------------------------------------------------------------------------
+   4. Tables
+   -------------------------------------------------------------------------- */
+.rhc-table-wrap {
+    overflow-x: auto;
+}
+
+.rhc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--rhc-text-base);
+}
+
+.rhc-table th,
+.rhc-table td {
+    padding: var(--rhc-space-2) var(--rhc-space-3);
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.rhc-table thead th {
+    padding-top: var(--rhc-space-1);
+    padding-bottom: var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+    background: var(--rhc-surface-sunken);
+    border-bottom: 1px solid var(--rhc-border);
+}
+
+.rhc-table tbody tr {
+    border-bottom: 1px solid var(--rhc-divider);
+    transition: background-color var(--rhc-duration-fast) var(--rhc-ease);
+}
+
+.rhc-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.rhc-table tbody tr:hover {
+    background: var(--rhc-surface-alt);
+}
+
+.cell-strong { font-weight: var(--rhc-weight-semibold); }
+.cell-muted { color: var(--rhc-text-secondary); }
+
+.cell-mono {
+    font-family: var(--rhc-font-mono);
+    font-size: var(--rhc-text-sm);
+}
+
+.cell-stack {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+}
+
+.cell-stack-sub {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+.cell-numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Person cell: avatar plus two lines, as in Teams and Dynamics. */
+.cell-person {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+}
+
+.route-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+}
+
+.route-arrow {
+    color: var(--rhc-text-tertiary);
+    font-size: 10px;
+}
+
+/* Capacity meter */
+.bed-meter {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-1);
+}
+
+.bed-meter-track {
+    width: 52px;
+    height: 5px;
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-pill);
+    overflow: hidden;
+}
+
+.bed-meter-fill {
+    height: 100%;
+    background: var(--rhc-success);
+    border-radius: var(--rhc-radius-pill);
+    transition: width var(--rhc-duration-slower) var(--rhc-ease-out);
+}
+
+.bed-meter-fill-warning { background: var(--rhc-warning); }
+.bed-meter-fill-danger { background: var(--rhc-danger); }
+
+.bed-meter-text {
+    font-size: var(--rhc-text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--rhc-text-secondary);
+}
+
+/* Loading skeleton for table bodies. */
+.skeleton-bar {
+    height: 10px;
+    background: linear-gradient(90deg,
+        var(--rhc-neutral-subtle) 25%,
+        var(--rhc-surface-hover) 37%,
+        var(--rhc-neutral-subtle) 63%);
+    background-size: 400% 100%;
+    border-radius: var(--rhc-radius-sm);
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+    from { background-position: 100% 50%; }
+    to { background-position: 0 50%; }
+}
+
+/* --------------------------------------------------------------------------
+   5. Definition rows
+   -------------------------------------------------------------------------- */
+.info-list { margin: 0; }
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--rhc-space-2);
+    padding: 5px 0;
+    font-size: var(--rhc-text-base);
+}
+
+.info-row-label {
+    flex-shrink: 0;
+    width: 120px;
+    color: var(--rhc-text-secondary);
+}
+
+.info-row-value {
+    margin: 0;
+    min-width: 0;
+    font-weight: var(--rhc-weight-medium);
+    color: var(--rhc-text);
+}
+
+/* --------------------------------------------------------------------------
+   6. Empty state
+   -------------------------------------------------------------------------- */
+.dash-empty {
+    padding: var(--rhc-space-6) var(--rhc-space-3);
+    text-align: center;
+    color: var(--rhc-text-secondary);
+}
+
+.dash-empty-icon {
+    display: block;
+    margin-bottom: var(--rhc-space-1);
+    font-size: 26px;
+    color: var(--rhc-border-strong);
+}
+
+@media (max-width: 720px) {
+    .rhc-table th,
+    .rhc-table td {
+        padding: var(--rhc-space-1) var(--rhc-space-2);
+    }
+
+    .info-row-label {
+        width: 104px;
+    }
+}

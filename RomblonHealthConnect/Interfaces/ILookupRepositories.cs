@@ -19,6 +19,26 @@ public interface IHospitalRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<string>> GetMunicipalitiesAsync(CancellationToken cancellationToken = default);
+
+    /* -- management ---------------------------------------------------- */
+
+    /// <summary>Includes inactive facilities, for the management list.</summary>
+    Task<IReadOnlyList<Hospital>> GetAllIncludingInactiveAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Tracked entity, for editing. <see cref="GetByIdAsync"/> returns a detached copy.</summary>
+    Task<Hospital?> GetForUpdateAsync(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>True when the code is already taken by a different facility.</summary>
+    Task<bool> CodeExistsAsync(string code, int? excludeId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>Counts referrals and staff, so deletion can be blocked when in use.</summary>
+    Task<(int Referrals, int Doctors)> GetUsageAsync(int id, CancellationToken cancellationToken = default);
+
+    Task AddAsync(Hospital hospital, CancellationToken cancellationToken = default);
+
+    void Remove(Hospital hospital);
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>

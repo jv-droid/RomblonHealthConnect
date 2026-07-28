@@ -1,0 +1,202 @@
+@model RomblonHealthConnect.ViewModels.Hospitals.HospitalListViewModel
+@using RomblonHealthConnect.ViewModels.Hospitals
+
+@* Facility registry. Every active record here is a marker on the provincial map. *@
+
+<partial name="../Referrals/_StatusMessages" />
+
+<div class="page-toolbar">
+    <a class="rhc-btn rhc-btn-primary" asp-action="Create">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Facility
+    </a>
+    <a class="rhc-btn" asp-controller="Home" asp-action="Index">
+        <i class="fa-regular fa-map" aria-hidden="true"></i> View on map
+    </a>
+</div>
+
+<div class="referral-metrics">
+    <article class="metric-card">
+        <span class="metric-icon metric-icon-primary" aria-hidden="true"><i class="fa-regular fa-hospital"></i></span>
+        <div class="metric-content">
+            <span class="metric-label">Registered</span>
+            <span class="metric-value-row"><span class="metric-value">@Model.TotalCount</span></span>
+            <span class="metric-caption">Facilities in the registry</span>
+        </div>
+    </article>
+    <article class="metric-card">
+        <span class="metric-icon metric-icon-success" aria-hidden="true"><i class="fa-solid fa-signal"></i></span>
+        <div class="metric-content">
+            <span class="metric-label">Online</span>
+            <span class="metric-value-row"><span class="metric-value">@Model.OnlineCount</span></span>
+            <span class="metric-caption">Currently reporting</span>
+        </div>
+    </article>
+    <article class="metric-card">
+        <span class="metric-icon metric-icon-info" aria-hidden="true"><i class="fa-solid fa-truck-medical"></i></span>
+        <div class="metric-content">
+            <span class="metric-label">Emergency capable</span>
+            <span class="metric-value-row"><span class="metric-value">@Model.EmergencyCount</span></span>
+            <span class="metric-caption">Accept emergency cases</span>
+        </div>
+    </article>
+</div>
+
+<section class="rhc-card section-spaced" aria-label="Filter facilities">
+    <form class="filter-bar" method="get" asp-action="Index">
+        <div class="filter-field">
+            <label class="filter-label" for="searchTerm">Search</label>
+            <input class="rhc-input" id="searchTerm" name="searchTerm" type="search"
+                   value="@Model.SearchTerm" placeholder="Name, code, or municipality" autocomplete="off" />
+        </div>
+        <div class="filter-field">
+            <label class="filter-label" for="municipality">Municipality</label>
+            <select class="rhc-select" id="municipality" name="municipality">
+                <option value="">All municipalities</option>
+                @foreach (var m in Model.Municipalities)
+                {
+                    <option value="@m" selected="@(Model.Municipality == m)">@m</option>
+                }
+            </select>
+        </div>
+        <div class="filter-field">
+            <label class="filter-label" for="facilityType">Type</label>
+            <select class="rhc-select" id="facilityType" name="facilityType">
+                <option value="">All types</option>
+                @foreach (var t in Enum.GetValues<FacilityType>())
+                {
+                    <option value="@((int)t)" selected="@(Model.FacilityType == t)">
+                        @(t == FacilityType.RuralHealthUnit ? "Rural Health Unit" : t.ToString())
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="filter-field">
+            <span class="filter-label" aria-hidden="true">&nbsp;</span>
+            <div class="filter-actions">
+                <button type="submit" class="rhc-btn rhc-btn-primary">
+                    <i class="fa-solid fa-filter" aria-hidden="true"></i> Apply
+                </button>
+                <a class="rhc-btn" asp-action="Index">Reset</a>
+            </div>
+        </div>
+    </form>
+</section>
+
+<section class="rhc-card section-spaced" aria-labelledby="registry-heading">
+    <div class="rhc-card-header">
+        <div class="rhc-card-heading">
+            <h2 class="rhc-card-title" id="registry-heading">Facility Registry</h2>
+            <p class="rhc-card-subtitle">@Model.TotalCount facility(ies) &middot; active records appear on the map</p>
+        </div>
+    </div>
+
+    <div class="rhc-card-body rhc-card-body-flush">
+        <div class="rhc-table-wrap rhc-scroll">
+            <table class="rhc-table">
+                <caption class="rhc-visually-hidden">
+                    Registered facilities with type, municipality, status, emergency capability, beds, and staff
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Facility</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Municipality</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Emergency</th>
+                        <th scope="col">Beds</th>
+                        <th scope="col">Doctors</th>
+                        <th scope="col"><span class="rhc-visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.TotalCount == 0)
+                    {
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fa-regular fa-hospital empty-state-icon" aria-hidden="true"></i>
+                                    <p class="empty-state-title">No facilities found</p>
+                                    <p>Add a facility, or clear the filters.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var hospital in Model.Hospitals)
+                        {
+                            var pct = hospital.TotalBeds > 0
+                                ? (int)Math.Round(hospital.AvailableBeds * 100.0 / hospital.TotalBeds)
+                                : 0;
+
+                            <tr>
+                                <td>
+                                    <span class="cell-person">
+                                        <span class="facility-dot facility-dot-@ReferralDisplay.FacilityTypeKey(hospital.FacilityType)"
+                                              aria-hidden="true"></span>
+                                        <span class="cell-stack">
+                                            <span class="cell-strong">@hospital.Name</span>
+                                            <span class="cell-stack-sub">@hospital.Code</span>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td class="cell-muted">@hospital.TypeLabel</td>
+                                <td class="cell-muted">@hospital.Municipality</td>
+                                <td>
+                                    @if (!hospital.IsActive)
+                                    {
+                                        <span class="rhc-badge rhc-badge-neutral">Inactive</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rhc-badge @ReferralDisplay.FacilityStatusBadgeClass(hospital.Status)">
+                                            @hospital.Status
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (hospital.HasEmergency)
+                                    {
+                                        <span class="rhc-badge rhc-badge-success">24/7</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rhc-badge rhc-badge-neutral">None</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="bed-meter">
+                                        <span class="bed-meter-track">
+                                            <span class="bed-meter-fill" data-bed-fill="@pct"></span>
+                                        </span>
+                                        <span class="bed-meter-text">@hospital.AvailableBeds/@hospital.TotalBeds</span>
+                                    </span>
+                                </td>
+                                <td class="cell-muted rhc-numeric">@hospital.DoctorCount</td>
+                                <td>
+                                    <div class="row-actions">
+                                        <a class="rhc-btn rhc-btn-subtle rhc-btn-sm" asp-action="Edit" asp-route-id="@hospital.Id">
+                                            Edit
+                                        </a>
+                                        <form method="post" asp-action="Delete" asp-route-id="@hospital.Id"
+                                              data-confirm="Remove @hospital.Name from the network? Facilities with referral history are deactivated instead.">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="rhc-btn rhc-btn-subtle rhc-btn-sm"
+                                                    aria-label="Remove @hospital.Name">
+                                                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/hospital-list.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,218 @@
+@model RomblonHealthConnect.ViewModels.Hospitals.HospitalFormViewModel
+@using System.Text.Json
+@using RomblonHealthConnect.Constants
+
+@* Create/edit a facility. The map picker writes straight into the latitude and
+   longitude fields, so what you place is exactly what the dashboard renders. *@
+
+@{
+    var centresJson = JsonSerializer.Serialize(
+        RomblonGeography.MunicipalityCentres.ToDictionary(
+            kv => kv.Key,
+            kv => new { lat = kv.Value.Latitude, lon = kv.Value.Longitude }));
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<partial name="../Referrals/_StatusMessages" />
+
+<div class="page-toolbar">
+    <a class="rhc-btn" asp-action="Index">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i> All facilities
+    </a>
+</div>
+
+<form method="post" asp-action="@(Model.IsEdit ? "Edit" : "Create")" asp-route-id="@(Model.IsEdit ? Model.Id : null)">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div asp-validation-summary="ModelOnly" class="rhc-alert rhc-alert-error"></div>
+
+    <div class="capability-grid">
+
+        <!-- Details -->
+        <section class="rhc-card" aria-labelledby="details-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="details-heading">Facility details</h2>
+                    <p class="rhc-card-subtitle">Identity, classification, and capacity</p>
+                </div>
+            </div>
+
+            <div class="rhc-card-body">
+                <div class="filter-field">
+                    <label class="filter-label" asp-for="Name"></label>
+                    <input class="rhc-input" asp-for="Name" placeholder="Romblon Provincial Hospital" />
+                    <span class="rhc-field-error" asp-validation-for="Name"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="FacilityType"></label>
+                    <select class="rhc-select" asp-for="FacilityType">
+                        <option value="0">Provincial / Public Hospital</option>
+                        <option value="1">District Hospital</option>
+                        <option value="2">Rural Health Unit</option>
+                        <option value="3">Private Facility</option>
+                    </select>
+                    <span class="rhc-field-error" asp-validation-for="FacilityType"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="Municipality"></label>
+                    <select class="rhc-select" asp-for="Municipality" id="Municipality">
+                        <option value="">Select a municipality</option>
+                        @foreach (var m in RomblonGeography.Municipalities)
+                        {
+                            <option value="@m" selected="@(Model.Municipality == m)">@m</option>
+                        }
+                    </select>
+                    <span class="rhc-field-error" asp-validation-for="Municipality"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="Address"></label>
+                    <input class="rhc-input" asp-for="Address" placeholder="Barangay Capaclan, Romblon" />
+                    <span class="rhc-field-error" asp-validation-for="Address"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="ContactNumber"></label>
+                    <input class="rhc-input" asp-for="ContactNumber" placeholder="(042) 567 1234" />
+                    <span class="rhc-field-error" asp-validation-for="ContactNumber"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="Email"></label>
+                    <input class="rhc-input" asp-for="Email" type="email" placeholder="facility@romblonhealth.gov.ph" />
+                    <span class="rhc-field-error" asp-validation-for="Email"></span>
+                </div>
+
+                <div class="filter-field section-spaced">
+                    <label class="filter-label" asp-for="Code"></label>
+                    <input class="rhc-input" asp-for="Code" placeholder="Leave blank to generate from the name" />
+                    <span class="rhc-field-error" asp-validation-for="Code"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location -->
+        <section class="rhc-card" aria-labelledby="location-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h2 class="rhc-card-title" id="location-heading">Map location</h2>
+                    <p class="rhc-card-subtitle">Click the map or drag the pin to set the exact position</p>
+                </div>
+                <div class="rhc-card-tools">
+                    <button type="button" class="rhc-btn rhc-btn-sm" id="centreOnMunicipality">
+                        <i class="fa-solid fa-crosshairs" aria-hidden="true"></i> Centre
+                    </button>
+                </div>
+            </div>
+
+            <div class="rhc-card-body">
+                <div class="wizard-map-shell">
+                    <div class="map-canvas" id="locationPicker" role="application"
+                         aria-label="Click to place the facility location on the map of Romblon"></div>
+                </div>
+
+                <p class="rhc-caption section-spaced" id="pickerHint">
+                    Choose a municipality to centre the map, then click to drop the pin.
+                </p>
+
+                <div class="capability-stats section-spaced">
+                    <div class="filter-field">
+                        <label class="filter-label" asp-for="Latitude"></label>
+                        <input class="rhc-input" asp-for="Latitude" type="number" step="0.000001"
+                               id="Latitude" placeholder="12.5764" />
+                        <span class="rhc-field-error" asp-validation-for="Latitude"></span>
+                    </div>
+                    <div class="filter-field">
+                        <label class="filter-label" asp-for="Longitude"></label>
+                        <input class="rhc-input" asp-for="Longitude" type="number" step="0.000001"
+                               id="Longitude" placeholder="122.2708" />
+                        <span class="rhc-field-error" asp-validation-for="Longitude"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Capacity and status -->
+    <section class="rhc-card section-spaced" aria-labelledby="capacity-heading">
+        <div class="rhc-card-header">
+            <div class="rhc-card-heading">
+                <h2 class="rhc-card-title" id="capacity-heading">Capacity and status</h2>
+                <p class="rhc-card-subtitle">Drives the bed meters and the emergency marker</p>
+            </div>
+        </div>
+
+        <div class="rhc-card-body">
+            <div class="capability-stats">
+                <div class="filter-field">
+                    <label class="filter-label" asp-for="TotalBeds"></label>
+                    <input class="rhc-input" asp-for="TotalBeds" type="number" min="0" max="5000" />
+                    <span class="rhc-field-error" asp-validation-for="TotalBeds"></span>
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label" asp-for="AvailableBeds"></label>
+                    <input class="rhc-input" asp-for="AvailableBeds" type="number" min="0" max="5000" />
+                    <span class="rhc-field-error" asp-validation-for="AvailableBeds"></span>
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label" asp-for="Status"></label>
+                    <select class="rhc-select" asp-for="Status">
+                        <option value="0">Online</option>
+                        <option value="1">Limited connectivity</option>
+                        <option value="2">Offline</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-field section-spaced">
+                <label class="filter-label" asp-for="Services"></label>
+                <textarea class="rhc-textarea" asp-for="Services"
+                          placeholder="Emergency, Surgery, Laboratory, Radiology"></textarea>
+                <span class="rhc-caption">Separate each service with a comma.</span>
+            </div>
+
+            <div class="chip-group section-spaced">
+                <label class="option-card" for="HasEmergency">
+                    <input type="checkbox" asp-for="HasEmergency" id="HasEmergency" />
+                    <span class="option-card-body">
+                        <span class="option-card-title">Emergency capable</span>
+                        <span class="option-card-meta">Accepts emergency referrals around the clock</span>
+                    </span>
+                </label>
+
+                <label class="option-card" for="IsActive">
+                    <input type="checkbox" asp-for="IsActive" id="IsActive" />
+                    <span class="option-card-body">
+                        <span class="option-card-title">Active in the network</span>
+                        <span class="option-card-meta">Inactive facilities are hidden from the map</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div class="wizard-footer">
+            <a class="rhc-btn" asp-action="Index">Cancel</a>
+            <span class="wizard-footer-spacer"></span>
+            <button type="submit" class="rhc-btn rhc-btn-primary">
+                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                @(Model.IsEdit ? "Save changes" : "Add facility")
+            </button>
+        </div>
+    </section>
+</form>
+
+@* Municipality centres, so the picker can jump to the chosen town. *@
+<script type="application/json" id="municipalityCentres">@Html.Raw(centresJson)</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin="anonymous"></script>
+    <script src="~/js/hospital-form.js" asp-append-version="true"></script>
+}

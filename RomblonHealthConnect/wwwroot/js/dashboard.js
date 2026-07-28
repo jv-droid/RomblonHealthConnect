@@ -1,7 +1,8 @@
 /* ==========================================================================
-   Romblon HealthConnect — Dashboard
-   Prototype mock data, view rendering, shell behaviour, and the facility drawer.
-   Exposes window.RHC so health-map.js can share the same facility records.
+   Romblon HealthConnect — Provincial dashboard
+   Prototype facility data, executive overview rendering, operational lists,
+   and the facility drawer. Publishes window.RHC so health-map.js and the
+   command palette share the same records.
    ========================================================================== */
 
 (function (window, document) {
@@ -10,298 +11,63 @@
     var RHC = window.RHC = window.RHC || {};
 
     /* ----------------------------------------------------------------------
-       1. Mock data — illustrative only, not real health records
+       1. Prototype data — illustrative only, not real health records
        ---------------------------------------------------------------------- */
 
+    // Facilities, the referral feed, the on-duty roster, and the summary figures
+    // all come from the database via /Home/NetworkData. That is what makes a
+    // facility registered in the Hospitals module appear here — and on the
+    // map — with no further wiring.
+    //
     // Coordinates are [longitude, latitude] to match MapLibre's ordering.
-    var FACILITIES = [
-        {
-            id: 'rph-romblon',
-            name: 'Romblon Provincial Hospital',
-            type: 'public',
-            typeLabel: 'Provincial Hospital',
-            municipality: 'Romblon',
-            address: 'Barangay Capaclan, Romblon, Romblon',
-            contact: '(042) 567 1234',
-            coordinates: [122.2708, 12.5764],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 14,
-            bedsAvailable: 32,
-            bedsTotal: 120,
-            specializations: ['Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics', 'Anesthesiology', 'Radiology'],
-            updatedMinutesAgo: 3
-        },
-        {
-            id: 'tidh-odiongan',
-            name: 'Tablas Island District Hospital',
-            type: 'district',
-            typeLabel: 'District Hospital',
-            municipality: 'Odiongan',
-            address: 'Barangay Dapawan, Odiongan, Romblon',
-            contact: '(042) 567 5580',
-            coordinates: [121.9889, 12.4003],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 9,
-            bedsAvailable: 18,
-            bedsTotal: 75,
-            specializations: ['Internal Medicine', 'Surgery', 'Pediatrics', 'Obstetrics'],
-            updatedMinutesAgo: 6
-        },
-        {
-            id: 'rdh-romblon',
-            name: 'Romblon District Hospital',
-            type: 'district',
-            typeLabel: 'District Hospital',
-            municipality: 'Romblon',
-            address: 'Barangay Bagacay, Romblon, Romblon',
-            contact: '(042) 567 2210',
-            coordinates: [122.2609, 12.5698],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 6,
-            bedsAvailable: 11,
-            bedsTotal: 50,
-            specializations: ['Internal Medicine', 'Pediatrics', 'General Practice'],
-            updatedMinutesAgo: 11
-        },
-        {
-            id: 'adh-alcantara',
-            name: 'Alcantara District Hospital',
-            type: 'district',
-            typeLabel: 'District Hospital',
-            municipality: 'Alcantara',
-            address: 'Poblacion, Alcantara, Romblon',
-            contact: '(042) 567 3341',
-            coordinates: [122.0667, 12.2333],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 5,
-            bedsAvailable: 4,
-            bedsTotal: 40,
-            specializations: ['Internal Medicine', 'General Practice', 'Obstetrics'],
-            updatedMinutesAgo: 8
-        },
-        {
-            id: 'cdh-cajidiocan',
-            name: 'Cajidiocan District Hospital',
-            type: 'district',
-            typeLabel: 'District Hospital',
-            municipality: 'Cajidiocan',
-            address: 'Poblacion, Cajidiocan, Sibuyan Island',
-            contact: '(042) 567 4419',
-            coordinates: [122.5308, 12.4394],
-            status: 'limited',
-            emergency: true,
-            doctorsAvailable: 3,
-            bedsAvailable: 7,
-            bedsTotal: 35,
-            specializations: ['General Practice', 'Pediatrics'],
-            updatedMinutesAgo: 24
-        },
-        {
-            id: 'sfdh-sanfernando',
-            name: 'San Fernando District Hospital',
-            type: 'district',
-            typeLabel: 'District Hospital',
-            municipality: 'San Fernando',
-            address: 'Poblacion, San Fernando, Sibuyan Island',
-            contact: '(042) 567 4802',
-            coordinates: [122.5461, 12.3175],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 4,
-            bedsAvailable: 9,
-            bedsTotal: 30,
-            specializations: ['General Practice', 'Internal Medicine'],
-            updatedMinutesAgo: 15
-        },
-        {
-            id: 'rhu-sanagustin',
-            name: 'San Agustin Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'San Agustin',
-            address: 'Poblacion, San Agustin, Tablas Island',
-            contact: '(042) 567 6120',
-            coordinates: [122.1333, 12.6167],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 2,
-            bedsAvailable: 6,
-            bedsTotal: 12,
-            specializations: ['General Practice', 'Maternal Health'],
-            updatedMinutesAgo: 19
-        },
-        {
-            id: 'rhu-sanandres',
-            name: 'San Andres Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'San Andres',
-            address: 'Poblacion, San Andres, Tablas Island',
-            contact: '(042) 567 6255',
-            coordinates: [122.0333, 12.5167],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 2,
-            bedsAvailable: 5,
-            bedsTotal: 10,
-            specializations: ['General Practice', 'Immunization'],
-            updatedMinutesAgo: 27
-        },
-        {
-            id: 'rhu-odiongan',
-            name: 'Odiongan Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'Odiongan',
-            address: 'Poblacion, Odiongan, Tablas Island',
-            contact: '(042) 567 5612',
-            coordinates: [121.9975, 12.4118],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 3,
-            bedsAvailable: 8,
-            bedsTotal: 15,
-            specializations: ['General Practice', 'Maternal Health', 'Immunization'],
-            updatedMinutesAgo: 5
-        },
-        {
-            id: 'rhu-magdiwang',
-            name: 'Magdiwang Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'Magdiwang',
-            address: 'Poblacion, Magdiwang, Sibuyan Island',
-            contact: '(042) 567 4703',
-            coordinates: [122.5217, 12.4972],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 2,
-            bedsAvailable: 4,
-            bedsTotal: 10,
-            specializations: ['General Practice', 'Maternal Health'],
-            updatedMinutesAgo: 31
-        },
-        {
-            id: 'rhu-looc',
-            name: 'Looc Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'Looc',
-            address: 'Poblacion, Looc, Tablas Island',
-            contact: '(042) 567 5934',
-            coordinates: [121.9944, 12.2611],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 2,
-            bedsAvailable: 3,
-            bedsTotal: 10,
-            specializations: ['General Practice'],
-            updatedMinutesAgo: 22
-        },
-        {
-            id: 'rhu-santafe',
-            name: 'Santa Fe Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'Santa Fe',
-            address: 'Poblacion, Santa Fe, Tablas Island',
-            contact: '(042) 567 5177',
-            coordinates: [122.0333, 12.1500],
-            status: 'offline',
-            emergency: false,
-            doctorsAvailable: 0,
-            bedsAvailable: 2,
-            bedsTotal: 8,
-            specializations: ['General Practice'],
-            updatedMinutesAgo: 96
-        },
-        {
-            id: 'rhu-corcuera',
-            name: 'Corcuera Rural Health Unit',
-            type: 'rhu',
-            typeLabel: 'Rural Health Unit',
-            municipality: 'Corcuera',
-            address: 'Poblacion, Corcuera, Simara Island',
-            contact: '(042) 567 6488',
-            coordinates: [122.1667, 12.6333],
-            status: 'limited',
-            emergency: false,
-            doctorsAvailable: 1,
-            bedsAvailable: 3,
-            bedsTotal: 8,
-            specializations: ['General Practice'],
-            updatedMinutesAgo: 44
-        },
-        {
-            id: 'tmc-odiongan',
-            name: 'Tablas Medical Center',
-            type: 'private',
-            typeLabel: 'Private Hospital',
-            municipality: 'Odiongan',
-            address: 'Barangay Liwayway, Odiongan, Romblon',
-            contact: '(042) 567 5900',
-            coordinates: [121.9820, 12.3946],
-            status: 'online',
-            emergency: true,
-            doctorsAvailable: 7,
-            bedsAvailable: 14,
-            bedsTotal: 45,
-            specializations: ['Internal Medicine', 'Surgery', 'Cardiology', 'Radiology'],
-            updatedMinutesAgo: 9
-        },
-        {
-            id: 'shmc-romblon',
-            name: 'Sacred Heart Medical Clinic',
-            type: 'private',
-            typeLabel: 'Private Clinic',
-            municipality: 'Romblon',
-            address: 'Barangay Ilauran, Romblon, Romblon',
-            contact: '(042) 567 2077',
-            coordinates: [122.2782, 12.5821],
-            status: 'online',
-            emergency: false,
-            doctorsAvailable: 3,
-            bedsAvailable: 5,
-            bedsTotal: 12,
-            specializations: ['General Practice', 'Dermatology', 'Laboratory'],
-            updatedMinutesAgo: 13
-        }
-    ];
-
-    var REFERRALS = [
-        { reference: 'RF-2026-0418', origin: 'Looc RHU', destination: 'Tablas Island District Hospital', status: 'accepted', time: '09:42' },
-        { reference: 'RF-2026-0417', origin: 'Magdiwang RHU', destination: 'Cajidiocan District Hospital', status: 'in-transit', time: '09:15' },
-        { reference: 'RF-2026-0416', origin: 'Alcantara District Hospital', destination: 'Romblon Provincial Hospital', status: 'pending', time: '08:57' },
-        { reference: 'RF-2026-0415', origin: 'San Andres RHU', destination: 'Tablas Island District Hospital', status: 'accepted', time: '08:30' },
-        { reference: 'RF-2026-0414', origin: 'Corcuera RHU', destination: 'Romblon Provincial Hospital', status: 'in-transit', time: '08:04' },
-        { reference: 'RF-2026-0413', origin: 'San Fernando District Hospital', destination: 'Romblon Provincial Hospital', status: 'completed', time: '07:38' },
-        { reference: 'RF-2026-0412', origin: 'Odiongan RHU', destination: 'Tablas Medical Center', status: 'completed', time: '07:12' },
-        { reference: 'RF-2026-0411', origin: 'San Agustin RHU', destination: 'Romblon District Hospital', status: 'declined', time: '06:55' }
-    ];
-
-    var DOCTORS = [
-        { name: 'Dr. M. Fabreag', specialty: 'Internal Medicine', hospital: 'Romblon Provincial Hospital', availability: 'available' },
-        { name: 'Dr. R. Fadri', specialty: 'General Surgery', hospital: 'Romblon Provincial Hospital', availability: 'in-surgery' },
-        { name: 'Dr. L. Mindoro', specialty: 'Pediatrics', hospital: 'Tablas Island District Hospital', availability: 'available' },
-        { name: 'Dr. A. Gaa', specialty: 'Obstetrics', hospital: 'Tablas Island District Hospital', availability: 'available' },
-        { name: 'Dr. C. Rioflorido', specialty: 'Cardiology', hospital: 'Tablas Medical Center', availability: 'on-call' },
-        { name: 'Dr. P. Musico', specialty: 'General Practice', hospital: 'Alcantara District Hospital', availability: 'available' },
-        { name: 'Dr. E. Solidum', specialty: 'Anesthesiology', hospital: 'Romblon Provincial Hospital', availability: 'on-call' },
-        { name: 'Dr. V. Faigao', specialty: 'General Practice', hospital: 'San Fernando District Hospital', availability: 'off-duty' }
-    ];
-
+    var FACILITIES = [];
+    var REFERRALS = [];
+    var DOCTORS = [];
     var OVERVIEW = {
-        lastSyncMinutesAgo: 2,
-        activity: { created: 18, accepted: 14, patients: 63 },
-        availability: { available: 26, onDuty: 41, unavailable: 12 }
+        lastSyncMinutesAgo: 0,
+        activity: { created: 0, accepted: 0, patients: 0 },
+        availability: { available: 0, onDuty: 0, unavailable: 0 }
     };
 
+    var NETWORK_ENDPOINT = '/Home/NetworkData';
+
+    /**
+     * Loads the live network snapshot. Resolves even on failure so the page
+     * still renders (with an empty state) rather than hanging.
+     */
+    async function loadNetwork() {
+        try {
+            var response = await fetch(NETWORK_ENDPOINT, {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network data request failed: ' + response.status);
+            }
+
+            var payload = await response.json();
+
+            FACILITIES = payload.facilities || [];
+            REFERRALS = payload.referrals || [];
+            DOCTORS = payload.doctors || [];
+            OVERVIEW = payload.overview || OVERVIEW;
+
+            // health-map.js and the command palette read through RHC.data.
+            RHC.data.facilities = FACILITIES;
+            RHC.data.referrals = REFERRALS;
+            RHC.data.doctors = DOCTORS;
+            RHC.data.overview = OVERVIEW;
+
+            return true;
+        } catch (error) {
+            window.console.error('[dashboard] Could not load network data:', error);
+            return false;
+        }
+    }
+
     /* ----------------------------------------------------------------------
-       2. Labels and badge mappings
+       2. Display mappings
        ---------------------------------------------------------------------- */
 
     var STATUS_META = {
@@ -325,12 +91,19 @@
         'off-duty': { label: 'Off duty', badge: 'rhc-badge-neutral' }
     };
 
+    var TYPE_ICONS = {
+        public: 'fa-hospital',
+        district: 'fa-house-medical',
+        rhu: 'fa-kit-medical',
+        private: 'fa-briefcase-medical'
+    };
+
     /* ----------------------------------------------------------------------
        3. Helpers
        ---------------------------------------------------------------------- */
 
     function escapeHtml(value) {
-        return String(value)
+        return String(value === null || value === undefined ? '' : value)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
@@ -348,8 +121,7 @@
     }
 
     function badge(meta) {
-        if (!meta) { return ''; }
-        return '<span class="rhc-badge ' + meta.badge + '">' + escapeHtml(meta.label) + '</span>';
+        return meta ? '<span class="rhc-badge ' + meta.badge + '">' + escapeHtml(meta.label) + '</span>' : '';
     }
 
     function setText(selector, value) {
@@ -357,75 +129,214 @@
         if (node) { node.textContent = value; }
     }
 
-    /** Bed occupancy drives the meter colour: green > 25%, amber > 10%, else red. */
-    function bedMeterClass(available, total) {
+    function setHtml(selector, value) {
+        var node = document.querySelector(selector);
+        if (node) { node.innerHTML = value; }
+    }
+
+    function facilityById(id) {
+        return FACILITIES.filter(function (f) { return f.id === id; })[0] || null;
+    }
+
+    /** Occupancy severity: green above 25% free, amber above 10%, else red. */
+    function capacityClass(available, total, prefix) {
         var ratio = total > 0 ? available / total : 0;
         if (ratio > 0.25) { return ''; }
-        if (ratio > 0.1) { return 'bed-meter-fill-warning'; }
-        return 'bed-meter-fill-danger';
+        if (ratio > 0.1) { return prefix + '-warning'; }
+        return prefix + '-danger';
+    }
+
+    /** Initials for a person avatar, for example "Dr. M. Fabreag" to "MF". */
+    function initials(name) {
+        var parts = name.replace(/^Dr\.\s*/i, '').split(/\s+/).filter(Boolean);
+        var first = parts[0] ? parts[0][0] : '';
+        var last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+        return (first + last).toUpperCase();
     }
 
     /* ----------------------------------------------------------------------
-       4. Rendering
+       4. Derived provincial figures
        ---------------------------------------------------------------------- */
 
-    function renderMetrics() {
-        var totalDoctors = FACILITIES.reduce(function (sum, f) { return sum + f.doctorsAvailable; }, 0);
+    var GENERAL_CARE = ['General Practice', 'Maternal Health', 'Immunization', 'Laboratory'];
+
+    function computeNetwork() {
+        var reporting = FACILITIES.filter(function (f) { return f.status !== 'offline'; });
+        var offline = FACILITIES.length - reporting.length;
+        var limited = FACILITIES.filter(function (f) { return f.status === 'limited'; }).length;
+
+        var specialists = {};
+        FACILITIES.forEach(function (f) {
+            f.specializations.forEach(function (s) {
+                if (GENERAL_CARE.indexOf(s) === -1) { specialists[s] = true; }
+            });
+        });
+
         var activeReferrals = REFERRALS.filter(function (r) {
             return r.status === 'pending' || r.status === 'accepted' || r.status === 'in-transit';
         }).length;
 
-        // Count distinct specialisations that are not general/primary care.
-        var generalCare = ['General Practice', 'Maternal Health', 'Immunization', 'Laboratory'];
-        var specialists = {};
-        FACILITIES.forEach(function (f) {
-            f.specializations.forEach(function (s) {
-                if (generalCare.indexOf(s) === -1) { specialists[s] = true; }
-            });
-        });
+        return {
+            total: FACILITIES.length,
+            reporting: reporting.length,
+            offline: offline,
+            limited: limited,
+            emergency: FACILITIES.filter(function (f) { return f.emergency; }).length,
+            doctors: FACILITIES.reduce(function (sum, f) { return sum + f.doctorsAvailable; }, 0),
+            specialists: Object.keys(specialists).length,
+            activeReferrals: activeReferrals,
+            pendingReferrals: REFERRALS.filter(function (r) { return r.status === 'pending'; }).length,
+            bedsAvailable: FACILITIES.reduce(function (sum, f) { return sum + f.bedsAvailable; }, 0),
+            bedsTotal: FACILITIES.reduce(function (sum, f) { return sum + f.bedsTotal; }, 0)
+        };
+    }
 
-        var metrics = {
-            totalHospitals: {
-                value: FACILITIES.length,
-                caption: 'Registered across the province',
+    /* ----------------------------------------------------------------------
+       5. Critical status strip
+       ---------------------------------------------------------------------- */
+
+    function renderStatusStrip(net) {
+        var strip = document.getElementById('statusStrip');
+        if (!strip) { return; }
+
+        // Severity escalates only on real degradation, never on routine load.
+        var severity = 'normal';
+        var headline = 'All systems operational';
+
+        if (net.offline > 0) {
+            severity = 'warning';
+            headline = net.offline + ' facility' + (net.offline === 1 ? '' : 's') + ' not reporting';
+        }
+
+        if (net.offline > 2) {
+            severity = 'critical';
+        }
+
+        strip.setAttribute('data-severity', severity);
+
+        var dot = strip.querySelector('.live-dot');
+        if (dot) {
+            dot.className = 'live-dot' +
+                (severity === 'critical' ? ' live-dot-danger' : severity === 'warning' ? ' live-dot-warning' : '');
+        }
+
+        setText('[data-status-headline]', headline);
+        setText('[data-status-reporting]', net.reporting + ' of ' + net.total);
+        setText('[data-status-emergency]', String(net.emergency));
+        setText('[data-status-updated]', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
+    }
+
+    /* ----------------------------------------------------------------------
+       6. Executive KPI cards
+       ---------------------------------------------------------------------- */
+
+    function renderKpis(net) {
+        var cards = {
+            hospitals: {
+                value: net.total,
+                unit: 'facilities',
+                support: net.reporting + ' reporting across 17 municipalities',
+                updated: 3,
                 trend: { direction: 'flat', label: 'No change' }
             },
-            availableDoctors: {
-                value: totalDoctors,
-                caption: 'On duty across all facilities',
-                trend: { direction: 'up', label: '+4' }
+            doctors: {
+                value: net.doctors,
+                support: 'Currently on duty province-wide',
+                updated: 5,
+                trend: { direction: 'up', label: '+4 today' }
             },
-            activeReferrals: {
-                value: activeReferrals,
-                caption: 'Awaiting or in progress',
+            referrals: {
+                value: net.activeReferrals,
+                support: net.pendingReferrals + ' awaiting acceptance',
+                updated: 2,
                 trend: { direction: 'up', label: '+12%' }
             },
             specialists: {
-                value: Object.keys(specialists).length,
-                caption: 'Distinct specialties offered',
+                value: net.specialists,
+                support: 'Distinct specialties offered',
+                updated: 14,
                 trend: { direction: 'down', label: '-2' }
             }
         };
 
-        Object.keys(metrics).forEach(function (key) {
-            var metric = metrics[key];
-            setText('[data-metric="' + key + '"]', metric.value);
-            setText('[data-metric-caption="' + key + '"]', metric.caption);
+        var icons = { up: 'fa-arrow-trend-up', down: 'fa-arrow-trend-down', flat: 'fa-minus' };
 
-            var trendNode = document.querySelector('[data-metric-trend="' + key + '"]');
-            if (!trendNode) { return; }
+        Object.keys(cards).forEach(function (key) {
+            var card = cards[key];
 
-            var icons = { up: 'fa-arrow-trend-up', down: 'fa-arrow-trend-down', flat: 'fa-minus' };
-            trendNode.className = 'metric-trend metric-trend-' + metric.trend.direction;
-            trendNode.innerHTML = '<i class="fa-solid ' + icons[metric.trend.direction] + '" aria-hidden="true"></i>' +
-                escapeHtml(metric.trend.label);
+            setText('[data-kpi="' + key + '"]', card.value);
+            setText('[data-kpi-support="' + key + '"]', card.support);
+            setText('[data-kpi-time="' + key + '"]', formatRelativeTime(card.updated));
+
+            if (card.unit) {
+                setText('[data-kpi-unit="' + key + '"]', card.unit);
+            }
+
+            var trend = document.querySelector('[data-kpi-trend="' + key + '"]');
+            if (trend) {
+                trend.className = 'kpi-trend kpi-trend-' + card.trend.direction;
+                trend.innerHTML = '<i class="fa-solid ' + icons[card.trend.direction] + '" aria-hidden="true"></i>' +
+                    escapeHtml(card.trend.label);
+            }
         });
     }
 
-    function renderOverview() {
-        var reporting = FACILITIES.filter(function (f) { return f.status !== 'offline'; }).length;
+    /* ----------------------------------------------------------------------
+       7. Executive summary panel
+       ---------------------------------------------------------------------- */
 
-        setText('[data-status="reporting"]', reporting + ' of ' + FACILITIES.length);
+    function renderExecutiveSummary(net) {
+        var list = document.querySelector('[data-summary-list]');
+        if (!list) { return; }
+
+        function line(text, tone) {
+            var toneClass = tone ? ' exec-summary-check-' + tone : '';
+            var icon = tone === 'warning' ? 'fa-exclamation' : tone === 'danger' ? 'fa-xmark' : 'fa-check';
+
+            return '<li class="exec-summary-item">' +
+                '<span class="exec-summary-check' + toneClass + '" aria-hidden="true">' +
+                    '<i class="fa-solid ' + icon + '"></i></span>' +
+                '<span>' + text + '</span>' +
+            '</li>';
+        }
+
+        var items = [
+            line('<strong>' + net.reporting + '</strong> of ' + net.total + ' hospitals connected'),
+            line('<strong>' + net.doctors + '</strong> doctors available'),
+            line('<strong>' + net.activeReferrals + '</strong> active referrals'),
+            line('<strong>' + net.emergency + '</strong> emergency-capable facilities')
+        ];
+
+        if (net.offline > 0) {
+            items.push(line('<strong>' + net.offline + '</strong> facility not reporting', 'warning'));
+        } else {
+            items.push(line('No critical system alerts'));
+        }
+
+        if (net.limited > 0) {
+            items.push(line('<strong>' + net.limited + '</strong> on limited connectivity', 'warning'));
+        }
+
+        list.innerHTML = items.join('');
+
+        setText('[data-summary-date]', new Date().toLocaleDateString('en-PH', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        }));
+
+        var occupied = net.bedsTotal - net.bedsAvailable;
+        var occupancyPct = net.bedsTotal > 0 ? Math.round((occupied / net.bedsTotal) * 100) : 0;
+
+        setText('[data-summary-beds]', net.bedsAvailable);
+        setText('[data-summary-beds-note]',
+            'beds free of ' + net.bedsTotal + ' · ' + occupancyPct + '% occupied');
+    }
+
+    /* ----------------------------------------------------------------------
+       8. Operational panel
+       ---------------------------------------------------------------------- */
+
+    function renderOverview(net) {
+        setText('[data-status="reporting"]', net.reporting + ' of ' + net.total);
         setText('[data-status="lastSync"]', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
 
         setText('[data-activity="created"]', OVERVIEW.activity.created);
@@ -436,25 +347,50 @@
         setText('[data-availability="onDuty"]', OVERVIEW.availability.onDuty);
         setText('[data-availability="unavailable"]', OVERVIEW.availability.unavailable);
 
-        setText('[data-map-count]', FACILITIES.length);
+        setText('[data-map-count]', net.total);
+
+        // Proportional split of the on-duty roster.
+        var bar = document.querySelector('[data-availability-bar]');
+        if (bar) {
+            var a = OVERVIEW.availability;
+            var total = a.available + a.onDuty + a.unavailable;
+
+            if (total > 0) {
+                bar.innerHTML =
+                    '<span class="share-bar-part share-bar-success" style="width:' +
+                        ((a.available / total) * 100) + '%"></span>' +
+                    '<span class="share-bar-part share-bar-warning" style="width:' +
+                        ((a.onDuty / total) * 100) + '%"></span>' +
+                    '<span class="share-bar-part share-bar-neutral" style="width:' +
+                        ((a.unavailable / total) * 100) + '%"></span>';
+            }
+        }
     }
+
+    /* ----------------------------------------------------------------------
+       9. Tables
+       ---------------------------------------------------------------------- */
 
     function renderReferrals() {
         var body = document.querySelector('[data-table="referrals"]');
         if (!body) { return; }
 
         body.innerHTML = REFERRALS.map(function (item) {
+            var origin = facilityById(item.origin);
+            var destination = facilityById(item.destination);
+
             return '<tr>' +
                 '<td class="cell-mono">' + escapeHtml(item.reference) + '</td>' +
                 '<td>' +
                     '<span class="route-cell">' +
-                        '<span class="cell-muted">' + escapeHtml(item.origin) + '</span>' +
+                        '<span class="cell-muted">' + escapeHtml(origin ? origin.name : item.origin) + '</span>' +
                         '<i class="fa-solid fa-arrow-right route-arrow" aria-hidden="true"></i>' +
-                        '<span class="cell-strong">' + escapeHtml(item.destination) + '</span>' +
+                        '<span class="cell-strong">' +
+                            escapeHtml(destination ? destination.name : item.destination) + '</span>' +
                     '</span>' +
                 '</td>' +
                 '<td>' + badge(REFERRAL_STATUS_META[item.status]) + '</td>' +
-                '<td class="cell-muted">' + escapeHtml(item.time) + '</td>' +
+                '<td class="cell-muted rhc-numeric">' + escapeHtml(item.time) + '</td>' +
             '</tr>';
         }).join('');
     }
@@ -466,9 +402,13 @@
         body.innerHTML = DOCTORS.map(function (doctor) {
             return '<tr>' +
                 '<td>' +
-                    '<span class="cell-stack">' +
-                        '<span class="cell-strong">' + escapeHtml(doctor.name) + '</span>' +
-                        '<span class="cell-stack-sub">' + escapeHtml(doctor.specialty) + '</span>' +
+                    '<span class="cell-person">' +
+                        '<span class="rhc-avatar rhc-avatar-sm rhc-avatar-neutral" aria-hidden="true">' +
+                            escapeHtml(initials(doctor.name)) + '</span>' +
+                        '<span class="cell-stack">' +
+                            '<span class="cell-strong">' + escapeHtml(doctor.name) + '</span>' +
+                            '<span class="cell-stack-sub">' + escapeHtml(doctor.specialty) + '</span>' +
+                        '</span>' +
                     '</span>' +
                 '</td>' +
                 '<td class="cell-muted">' + escapeHtml(doctor.hospital) + '</td>' +
@@ -502,10 +442,12 @@
                 '<td>' +
                     '<span class="bed-meter">' +
                         '<span class="bed-meter-track">' +
-                            '<span class="bed-meter-fill ' + bedMeterClass(facility.bedsAvailable, facility.bedsTotal) + '" ' +
-                                  'style="width:' + percent + '%"></span>' +
+                            '<span class="bed-meter-fill ' +
+                                capacityClass(facility.bedsAvailable, facility.bedsTotal, 'bed-meter-fill') +
+                                '" style="width:' + percent + '%"></span>' +
                         '</span>' +
-                        '<span class="bed-meter-text">' + facility.bedsAvailable + '/' + facility.bedsTotal + '</span>' +
+                        '<span class="bed-meter-text">' +
+                            facility.bedsAvailable + '/' + facility.bedsTotal + '</span>' +
                     '</span>' +
                 '</td>' +
             '</tr>';
@@ -513,15 +455,14 @@
     }
 
     /* ----------------------------------------------------------------------
-       5. Facility details drawer
+       10. Facility drawer
        ---------------------------------------------------------------------- */
 
-    var drawer = {
-        element: null,
-        backdrop: null,
-        lastFocused: null,
-        currentId: null
-    };
+    var drawer = { element: null, backdrop: null, lastFocused: null, currentId: null };
+
+    function referralsForFacility(id) {
+        return REFERRALS.filter(function (r) { return r.origin === id || r.destination === id; });
+    }
 
     function fillDrawer(facility) {
         var statusMeta = STATUS_META[facility.status];
@@ -533,33 +474,102 @@
         setText('[data-drawer="address"]', facility.address);
         setText('[data-drawer="contact"]', facility.contact);
         setText('[data-drawer="doctorsAvailable"]', facility.doctorsAvailable);
-        setText('[data-drawer="bedsAvailable"]', facility.bedsAvailable + ' / ' + facility.bedsTotal);
+        setText('[data-drawer="specialistCount"]', facility.specializations.length);
         setText('[data-drawer="lastUpdated"]', formatRelativeTime(facility.updatedMinutesAgo));
 
-        var statusNode = document.querySelector('[data-drawer="statusBadge"]');
-        if (statusNode) {
-            statusNode.innerHTML = '<span class="rhc-badge ' + statusMeta.badge + '">' +
-                '<i class="fa-solid ' + statusMeta.icon + '" aria-hidden="true"></i> ' +
-                escapeHtml(statusMeta.label) + '</span>';
+        // Type mark
+        var mark = document.querySelector('[data-drawer="typeMark"]');
+        if (mark) {
+            mark.className = 'drawer-type-mark drawer-type-' + facility.type;
+            mark.innerHTML = '<i class="fa-solid ' + (TYPE_ICONS[facility.type] || 'fa-hospital') + '"></i>';
         }
 
-        var emergencyNode = document.querySelector('[data-drawer="emergencyBadge"]');
-        if (emergencyNode) {
-            emergencyNode.innerHTML = facility.emergency
-                ? '<span class="rhc-badge rhc-badge-info"><i class="fa-solid fa-truck-medical" aria-hidden="true"></i> Emergency capable</span>'
-                : '<span class="rhc-badge rhc-badge-neutral">No emergency service</span>';
+        // Badges
+        setHtml('[data-drawer="statusBadge"]',
+            '<span class="rhc-badge ' + statusMeta.badge + '">' +
+            '<i class="fa-solid ' + statusMeta.icon + '" aria-hidden="true"></i> ' +
+            escapeHtml(statusMeta.label) + '</span>');
+
+        setHtml('[data-drawer="emergencyBadge"]', facility.emergency
+            ? '<span class="rhc-badge rhc-badge-danger">' +
+              '<i class="fa-solid fa-truck-medical" aria-hidden="true"></i> Emergency capable</span>'
+            : '<span class="rhc-badge rhc-badge-neutral">No emergency service</span>');
+
+        setHtml('[data-drawer="typeBadge"]',
+            '<span class="rhc-badge rhc-badge-neutral">' + escapeHtml(facility.typeLabel) + '</span>');
+
+        // Bed occupancy
+        var occupied = facility.bedsTotal - facility.bedsAvailable;
+        var occupancyPct = facility.bedsTotal > 0 ? Math.round((occupied / facility.bedsTotal) * 100) : 0;
+        var freePct = 100 - occupancyPct;
+
+        setText('[data-drawer="bedsAvailable"]', facility.bedsAvailable);
+        setText('[data-drawer="bedsTotal"]', 'of ' + facility.bedsTotal + ' beds free');
+        setText('[data-drawer="occupancyPct"]', occupancyPct + '% occupied');
+        setText('[data-drawer="occupancyNote"]',
+            occupied + ' beds in use · updated ' + formatRelativeTime(facility.updatedMinutesAgo));
+
+        var fill = document.querySelector('[data-drawer="occupancyFill"]');
+        if (fill) {
+            fill.className = 'occupancy-fill ' +
+                capacityClass(facility.bedsAvailable, facility.bedsTotal, 'occupancy-fill');
+            fill.style.width = freePct + '%';
         }
 
-        var specNode = document.querySelector('[data-drawer="specializations"]');
-        if (specNode) {
-            specNode.innerHTML = facility.specializations.map(function (spec) {
-                return '<span class="rhc-chip">' + escapeHtml(spec) + '</span>';
-            }).join('');
+        // Specializations
+        setHtml('[data-drawer="specializations"]', facility.specializations.map(function (spec) {
+            return '<span class="rhc-chip">' + escapeHtml(spec) + '</span>';
+        }).join(''));
+
+        // Current referrals
+        var related = referralsForFacility(facility.id);
+        setHtml('[data-drawer="referrals"]', related.length === 0
+            ? '<li class="activity-row"><span class="activity-label">No referrals today</span></li>'
+            : related.slice(0, 4).map(function (r) {
+                var meta = REFERRAL_STATUS_META[r.status];
+                var direction = r.destination === facility.id ? 'Incoming' : 'Outgoing';
+                var icon = r.destination === facility.id ? 'fa-arrow-down' : 'fa-arrow-up';
+
+                return '<li class="activity-row">' +
+                    '<span class="activity-icon" aria-hidden="true"><i class="fa-solid ' + icon + '"></i></span>' +
+                    '<span class="cell-stack">' +
+                        '<span class="cell-strong">' + escapeHtml(r.reference) + '</span>' +
+                        '<span class="cell-stack-sub">' + direction + ' · ' + escapeHtml(r.time) + '</span>' +
+                    '</span>' +
+                    '<span class="activity-value">' + badge(meta) + '</span>' +
+                '</li>';
+            }).join(''));
+
+        // Today's activity
+        setHtml('[data-drawer="activity"]', [
+            { icon: 'fa-user-group', label: 'Patients seen', value: facility.patientsToday },
+            { icon: 'fa-bed-pulse', label: 'Admissions', value: facility.admissionsToday },
+            { icon: 'fa-arrow-down', label: 'Referrals received', value: facility.incomingReferrals },
+            { icon: 'fa-arrow-up', label: 'Referrals sent', value: facility.outgoingReferrals }
+        ].map(function (row) {
+            return '<li class="activity-row">' +
+                '<span class="activity-icon" aria-hidden="true"><i class="fa-solid ' + row.icon + '"></i></span>' +
+                '<span class="activity-label">' + row.label + '</span>' +
+                '<span class="activity-value">' + row.value + '</span>' +
+            '</li>';
+        }).join(''));
+
+        // Quick action targets
+        var call = document.getElementById('drawerCall');
+        if (call) {
+            call.href = 'tel:' + facility.contact.replace(/[^0-9+]/g, '');
+        }
+
+        var directions = document.getElementById('drawerDirections');
+        if (directions) {
+            directions.href = 'https://www.openstreetmap.org/?mlat=' + facility.coordinates[1] +
+                '&mlon=' + facility.coordinates[0] + '#map=15/' +
+                facility.coordinates[1] + '/' + facility.coordinates[0];
         }
     }
 
     function openDrawer(facilityId) {
-        var facility = RHC.getFacility(facilityId);
+        var facility = facilityById(facilityId);
         if (!facility || !drawer.element) { return; }
 
         drawer.lastFocused = document.activeElement;
@@ -591,7 +601,8 @@
     function trapFocus(event) {
         if (event.key !== 'Tab' || !drawer.element.classList.contains('is-open')) { return; }
 
-        var focusable = drawer.element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        var focusable = drawer.element.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (focusable.length === 0) { return; }
 
         var first = focusable[0];
@@ -621,24 +632,26 @@
             trapFocus(event);
         });
 
-        // Prototype actions — wired to real routes in a later phase.
-        var viewDetails = document.getElementById('drawerViewDetails');
         var startReferral = document.getElementById('drawerStartReferral');
-
-        if (viewDetails) {
-            viewDetails.addEventListener('click', function () {
-                window.console.info('[prototype] View details for facility:', drawer.currentId);
-            });
-        }
         if (startReferral) {
             startReferral.addEventListener('click', function () {
-                window.console.info('[prototype] Start referral from facility:', drawer.currentId);
+                window.location.href = '/Referrals/Create';
+            });
+        }
+
+        var viewDetails = document.getElementById('drawerViewDetails');
+        if (viewDetails) {
+            viewDetails.addEventListener('click', function () {
+                var facility = facilityById(drawer.currentId);
+                window.location.href = facility
+                    ? '/Referrals?SearchTerm=' + encodeURIComponent(facility.name)
+                    : '/Referrals';
             });
         }
     }
 
     /* ----------------------------------------------------------------------
-       6. Shell behaviour
+       11. Shell behaviour
        ---------------------------------------------------------------------- */
 
     var SIDEBAR_STORAGE_KEY = 'rhc.sidebar';
@@ -650,7 +663,6 @@
         var backdrop = document.getElementById('sidebarBackdrop');
         if (!shell) { return; }
 
-        // Restore the collapsed preference from the previous visit.
         var stored = null;
         try {
             stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
@@ -681,10 +693,9 @@
                 try {
                     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, next);
                 } catch (error) {
-                    /* Storage unavailable (private mode) — preference is simply not persisted. */
+                    /* Storage unavailable — preference is simply not persisted. */
                 }
 
-                // The map needs to re-measure once the rail finishes animating.
                 window.setTimeout(function () {
                     document.dispatchEvent(new CustomEvent('rhc:layout-changed'));
                 }, 260);
@@ -710,7 +721,6 @@
             if (event.key === 'Escape') { setMobileNav(false); }
         });
 
-        // Close the mobile drawer after navigating.
         shell.querySelectorAll('.sidebar-link').forEach(function (link) {
             link.addEventListener('click', function () {
                 if (window.matchMedia('(max-width: 860px)').matches) { setMobileNav(false); }
@@ -718,37 +728,24 @@
         });
     }
 
-    function initDate() {
-        var node = document.getElementById('currentDate');
-        if (!node) { return; }
-
-        node.textContent = new Date().toLocaleDateString('en-PH', {
+    function initHeaderClock() {
+        setText('#currentDate', new Date().toLocaleDateString('en-PH', {
             weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-        });
+        }));
+
+        setText('#lastSyncLabel', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
+
+        // Keeps the "synced N minutes ago" label honest without polling a server.
+        window.setInterval(function () {
+            OVERVIEW.lastSyncMinutesAgo += 1;
+            setText('#lastSyncLabel', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
+            setText('[data-status-updated]', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
+            setText('[data-status="lastSync"]', formatRelativeTime(OVERVIEW.lastSyncMinutesAgo));
+        }, 60000);
     }
 
     /* ----------------------------------------------------------------------
-       7. Search — filters the visible table rows
-       ---------------------------------------------------------------------- */
-
-    function initSearch() {
-        var input = document.getElementById('globalSearch');
-        if (!input) { return; }
-
-        input.addEventListener('input', function () {
-            var term = input.value.trim().toLowerCase();
-
-            document.querySelectorAll('.rhc-table tbody tr').forEach(function (row) {
-                var matches = term === '' || row.textContent.toLowerCase().indexOf(term) !== -1;
-                row.style.display = matches ? '' : 'none';
-            });
-
-            document.dispatchEvent(new CustomEvent('rhc:search', { detail: { term: term } }));
-        });
-    }
-
-    /* ----------------------------------------------------------------------
-       8. Public API
+       12. Public API
        ---------------------------------------------------------------------- */
 
     RHC.data = {
@@ -758,32 +755,61 @@
         overview: OVERVIEW
     };
 
-    RHC.getFacility = function (id) {
-        return FACILITIES.filter(function (facility) { return facility.id === id; })[0] || null;
-    };
-
+    RHC.getFacility = facilityById;
     RHC.openFacility = openDrawer;
     RHC.closeFacility = closeDrawer;
     RHC.formatRelativeTime = formatRelativeTime;
     RHC.escapeHtml = escapeHtml;
 
     /* ----------------------------------------------------------------------
-       9. Bootstrap
+       13. Bootstrap
        ---------------------------------------------------------------------- */
 
-    function init() {
-        initShell();
-        initDate();
-        initDrawer();
-        initSearch();
+    /** Paints every data-driven region from the current snapshot. */
+    function renderAll() {
+        var net = computeNetwork();
 
-        renderMetrics();
-        renderOverview();
+        renderStatusStrip(net);
+        renderKpis(net);
+        renderExecutiveSummary(net);
+        renderOverview(net);
         renderReferrals();
         renderDoctors();
         renderFacilities();
+    }
 
-        document.dispatchEvent(new CustomEvent('rhc:ready'));
+    function showEmptyNetwork() {
+        var summary = document.querySelector('[data-summary-list]');
+        if (summary) {
+            summary.innerHTML =
+                '<li class="exec-summary-item">' +
+                    '<span class="exec-summary-check exec-summary-check-warning" aria-hidden="true">' +
+                        '<i class="fa-solid fa-exclamation"></i></span>' +
+                    '<span>No facilities registered yet. ' +
+                        '<a href="/Hospitals/Create">Add the first facility</a> to populate the map.</span>' +
+                '</li>';
+        }
+
+        setText('[data-status-headline]', 'No facilities registered');
+    }
+
+    function init() {
+        // Chrome first, so the shell is usable while the data request is in flight.
+        initShell();
+        initHeaderClock();
+        initDrawer();
+
+        // Other modules await this before touching RHC.data.
+        RHC.dataReady = loadNetwork().then(function (loaded) {
+            renderAll();
+
+            if (loaded && FACILITIES.length === 0) {
+                showEmptyNetwork();
+            }
+
+            document.dispatchEvent(new CustomEvent('rhc:ready'));
+            return loaded;
+        });
     }
 
     if (document.readyState === 'loading') {

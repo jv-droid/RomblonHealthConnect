@@ -1,21 +1,22 @@
 /* ==========================================================================
    Romblon HealthConnect — Foundation
-   Design tokens, base typography, and application shell (sidebar + topbar).
-   Component styles live in dashboard.css.
+   Design tokens, typography scale, and application shell.
+   Component styles live in dashboard.css, referrals.css, command-palette.css.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    1. Design tokens
    -------------------------------------------------------------------------- */
 :root {
-    /* Surfaces */
-    --rhc-bg: #F5F7FA;
+    /* Surfaces — the canvas is quieter than the cards that sit on it. */
+    --rhc-bg: #F3F5F8;
     --rhc-surface: #FFFFFF;
     --rhc-surface-alt: #FAFBFC;
     --rhc-surface-hover: #F3F4F6;
     --rhc-surface-active: #EBEDF0;
+    --rhc-surface-sunken: #F7F8FA;
 
-    /* Brand */
+    /* Brand — used sparingly: primary actions, selection, and links only. */
     --rhc-primary: #2563EB;
     --rhc-primary-hover: #1D4ED8;
     --rhc-primary-active: #1E40AF;
@@ -23,35 +24,38 @@
     --rhc-primary-subtle-hover: #E3EBFD;
     --rhc-secondary: #0F6CBD;
 
-    /* Text */
-    --rhc-text: #1B1A19;
-    --rhc-text-secondary: #605E5C;
-    --rhc-text-tertiary: #8A8886;
+    /* Text — four steps, no more. */
+    --rhc-text: #16181D;
+    --rhc-text-secondary: #5A5E68;
+    --rhc-text-tertiary: #8A8E98;
     --rhc-text-inverse: #FFFFFF;
 
     /* Lines */
-    --rhc-border: #E5E7EB;
-    --rhc-border-strong: #D1D5DB;
-    --rhc-divider: #EDEFF2;
+    --rhc-border: #E4E7EC;
+    --rhc-border-strong: #D0D5DD;
+    --rhc-divider: #EEF0F3;
 
-    /* Status */
+    /* Status — the only four semantic colours in the system. */
     --rhc-success: #107C10;
-    --rhc-success-subtle: #E9F4E9;
-    --rhc-warning: #F59E0B;
-    --rhc-warning-subtle: #FEF5E7;
-    --rhc-danger: #D13438;
-    --rhc-danger-subtle: #FDECEC;
+    --rhc-success-subtle: #E8F4E8;
+    --rhc-success-border: #C3E3C3;
+    --rhc-warning: #B76E00;
+    --rhc-warning-subtle: #FDF3E4;
+    --rhc-warning-border: #F4DDB8;
+    --rhc-danger: #C4314B;
+    --rhc-danger-subtle: #FDECEF;
+    --rhc-danger-border: #F3C7CF;
     --rhc-info: #0F6CBD;
     --rhc-info-subtle: #EAF3FB;
     --rhc-neutral-subtle: #F1F2F4;
 
-    /* Facility type accents (used by map markers + legend) */
+    /* Facility type accents — map markers and legend only. */
     --rhc-type-public: #0F6CBD;
     --rhc-type-district: #8764B8;
     --rhc-type-rhu: #107C10;
-    --rhc-type-private: #CA5010;
+    --rhc-type-private: #B76E00;
 
-    /* Spacing — 8px system with 4px half-steps */
+    /* Spacing — 4px base, 8px rhythm. */
     --rhc-space-half: 4px;
     --rhc-space-1: 8px;
     --rhc-space-2: 16px;
@@ -59,6 +63,7 @@
     --rhc-space-4: 32px;
     --rhc-space-5: 40px;
     --rhc-space-6: 48px;
+    --rhc-space-7: 64px;
 
     /* Radius */
     --rhc-radius-sm: 6px;
@@ -66,34 +71,46 @@
     --rhc-radius-lg: 14px;
     --rhc-radius-pill: 999px;
 
-    /* Elevation — deliberately soft */
-    --rhc-shadow-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
-    --rhc-shadow-2: 0 2px 4px rgba(16, 24, 40, 0.04), 0 4px 8px rgba(16, 24, 40, 0.06);
-    --rhc-shadow-3: 0 8px 16px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.04);
+    /* Elevation — four levels, all soft. */
+    --rhc-shadow-0: 0 0 0 1px rgba(16, 24, 40, 0.04);
+    --rhc-shadow-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
+    --rhc-shadow-2: 0 2px 4px rgba(16, 24, 40, 0.04), 0 4px 10px rgba(16, 24, 40, 0.05);
+    --rhc-shadow-3: 0 8px 20px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.04);
+    --rhc-shadow-4: 0 16px 40px rgba(16, 24, 40, 0.14), 0 4px 12px rgba(16, 24, 40, 0.06);
 
     /* Typography */
-    --rhc-font: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    --rhc-font: "Segoe UI Variable Display", "Segoe UI", "Segoe UI Web (West European)",
+                -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
     --rhc-font-mono: "Cascadia Mono", "Consolas", "Courier New", monospace;
 
+    /* Type scale — caption through display. */
     --rhc-text-xs: 11px;
     --rhc-text-sm: 12px;
     --rhc-text-base: 13px;
     --rhc-text-md: 14px;
     --rhc-text-lg: 16px;
     --rhc-text-xl: 20px;
-    --rhc-text-2xl: 28px;
+    --rhc-text-2xl: 24px;
+    --rhc-text-3xl: 32px;
+    --rhc-text-4xl: 40px;
 
-    /* Motion — restrained */
+    --rhc-weight-regular: 400;
+    --rhc-weight-medium: 500;
+    --rhc-weight-semibold: 600;
+
+    /* Motion — short and eased; nothing draws attention to itself. */
     --rhc-ease: cubic-bezier(0.33, 0, 0.67, 1);
+    --rhc-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --rhc-duration-fast: 100ms;
     --rhc-duration: 150ms;
     --rhc-duration-slow: 250ms;
+    --rhc-duration-slower: 400ms;
 
     /* Layout */
-    --rhc-sidebar-width: 248px;
+    --rhc-sidebar-width: 252px;
     --rhc-sidebar-width-collapsed: 56px;
-    --rhc-topbar-height: 60px;
-    --rhc-drawer-width: 384px;
+    --rhc-topbar-height: 64px;
+    --rhc-drawer-width: 400px;
 }
 
 /* --------------------------------------------------------------------------
@@ -124,8 +141,9 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     color: var(--rhc-text);
 }
 
@@ -142,14 +160,54 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Visible, consistent keyboard focus across the whole app. */
+/* --------------------------------------------------------------------------
+   3. Typography utilities
+   -------------------------------------------------------------------------- */
+.rhc-display {
+    font-size: var(--rhc-text-3xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.rhc-title {
+    font-size: var(--rhc-text-xl);
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 1.25;
+}
+
+/* Section eyebrow: uppercase, tracked, tertiary. Used above every group. */
+.rhc-eyebrow {
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.rhc-caption {
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+}
+
+.rhc-meta {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+}
+
+.rhc-numeric {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   4. Accessibility helpers
+   -------------------------------------------------------------------------- */
 :focus-visible {
     outline: 2px solid var(--rhc-primary);
     outline-offset: 2px;
     border-radius: var(--rhc-radius-sm);
 }
 
-/* Screen-reader-only content that stays keyboard reachable. */
 .rhc-visually-hidden {
     position: absolute;
     width: 1px;
@@ -169,7 +227,7 @@ a:hover {
     z-index: 100;
     padding: var(--rhc-space-1) var(--rhc-space-2);
     font-size: var(--rhc-text-base);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-text);
     background: var(--rhc-surface);
     border: 1px solid var(--rhc-border);
@@ -184,15 +242,14 @@ a:hover {
     text-decoration: none;
 }
 
-/* Restrained scrollbars that match the neutral palette. */
 .rhc-scroll {
     scrollbar-width: thin;
     scrollbar-color: var(--rhc-border-strong) transparent;
 }
 
 .rhc-scroll::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 .rhc-scroll::-webkit-scrollbar-track {
@@ -201,7 +258,7 @@ a:hover {
 
 .rhc-scroll::-webkit-scrollbar-thumb {
     background-color: var(--rhc-border-strong);
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     background-clip: content-box;
     border-radius: var(--rhc-radius-pill);
 }
@@ -212,7 +269,7 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   3. Application shell
+   5. Application shell
    -------------------------------------------------------------------------- */
 .app-shell {
     display: flex;
@@ -230,13 +287,13 @@ a:hover {
 
 .app-content {
     flex: 1;
-    padding: var(--rhc-space-3);
+    padding: var(--rhc-space-3) var(--rhc-space-4) var(--rhc-space-5);
     overflow-y: auto;
     overflow-x: hidden;
 }
 
 /* --------------------------------------------------------------------------
-   4. Sidebar navigation rail
+   6. Sidebar
    -------------------------------------------------------------------------- */
 .app-sidebar {
     display: flex;
@@ -266,11 +323,11 @@ a:hover {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     font-size: var(--rhc-text-md);
     color: var(--rhc-text-inverse);
-    background: var(--rhc-primary);
+    background: linear-gradient(140deg, var(--rhc-primary), var(--rhc-secondary));
     border-radius: var(--rhc-radius-sm);
 }
 
@@ -283,7 +340,8 @@ a:hover {
 
 .sidebar-brand-name {
     font-size: var(--rhc-text-md);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: -0.01em;
     white-space: nowrap;
 }
 
@@ -295,7 +353,7 @@ a:hover {
 
 .sidebar-nav {
     flex: 1;
-    padding: var(--rhc-space-2) var(--rhc-space-1);
+    padding: var(--rhc-space-2) var(--rhc-space-1) var(--rhc-space-3);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -303,20 +361,25 @@ a:hover {
 .sidebar-nav-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
+/* Group label with generous space above so sections read as distinct. */
 .sidebar-section-label {
-    padding: var(--rhc-space-2) var(--rhc-space-1) var(--rhc-space-half);
+    padding: var(--rhc-space-3) var(--rhc-space-1) var(--rhc-space-half);
     font-size: var(--rhc-text-xs);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--rhc-text-tertiary);
     white-space: nowrap;
+}
+
+.sidebar-nav > .sidebar-section-label:first-child {
+    padding-top: var(--rhc-space-half);
 }
 
 .sidebar-link {
@@ -324,16 +387,18 @@ a:hover {
     display: flex;
     align-items: center;
     gap: var(--rhc-space-2);
-    padding: var(--rhc-space-1) var(--rhc-space-1);
+    padding: 7px var(--rhc-space-1);
     font-size: var(--rhc-text-base);
-    font-weight: 400;
-    color: var(--rhc-text);
+    font-weight: var(--rhc-weight-regular);
+    color: var(--rhc-text-secondary);
     border-radius: var(--rhc-radius-sm);
     white-space: nowrap;
-    transition: background-color var(--rhc-duration) var(--rhc-ease);
+    transition: background-color var(--rhc-duration) var(--rhc-ease),
+                color var(--rhc-duration) var(--rhc-ease);
 }
 
 .sidebar-link:hover {
+    color: var(--rhc-text);
     background: var(--rhc-surface-hover);
     text-decoration: none;
 }
@@ -346,33 +411,38 @@ a:hover {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 24px;
+    width: 20px;
     font-size: var(--rhc-text-md);
+    color: var(--rhc-text-tertiary);
+    transition: color var(--rhc-duration) var(--rhc-ease);
+}
+
+.sidebar-link:hover .sidebar-link-icon {
     color: var(--rhc-text-secondary);
 }
 
+/* Active state: neutral surface plus a primary rail, not a blue block. */
 .sidebar-link.is-active {
-    font-weight: 600;
-    color: var(--rhc-primary);
-    background: var(--rhc-primary-subtle);
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-text);
+    background: var(--rhc-surface-active);
 }
 
 .sidebar-link.is-active:hover {
-    background: var(--rhc-primary-subtle-hover);
+    background: var(--rhc-surface-active);
 }
 
 .sidebar-link.is-active .sidebar-link-icon {
     color: var(--rhc-primary);
 }
 
-/* Fluent-style selection indicator on the leading edge. */
 .sidebar-link.is-active::before {
     content: "";
     position: absolute;
-    left: 0;
+    left: -1px;
     top: 50%;
     width: 3px;
-    height: 16px;
+    height: 18px;
     background: var(--rhc-primary);
     border-radius: var(--rhc-radius-pill);
     transform: translateY(-50%);
@@ -388,7 +458,7 @@ a:hover {
     align-items: center;
     gap: var(--rhc-space-2);
     width: 100%;
-    padding: var(--rhc-space-1);
+    padding: 7px var(--rhc-space-1);
     font-family: inherit;
     font-size: var(--rhc-text-base);
     color: var(--rhc-text-secondary);
@@ -409,7 +479,7 @@ a:hover {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 24px;
+    width: 20px;
     transition: transform var(--rhc-duration-slow) var(--rhc-ease);
 }
 
@@ -417,7 +487,7 @@ a:hover {
     transform: rotate(180deg);
 }
 
-/* Collapsed rail: hide every text label, centre the icons. */
+/* Collapsed rail */
 .app-shell[data-sidebar="collapsed"] .sidebar-brand-text,
 .app-shell[data-sidebar="collapsed"] .sidebar-link-label,
 .app-shell[data-sidebar="collapsed"] .sidebar-toggle-label,
@@ -433,19 +503,25 @@ a:hover {
     padding-right: var(--rhc-space-half);
 }
 
-/* Backdrop only ever appears on small screens (see media queries below). */
+/* Keeps groups separated once labels are hidden. */
+.app-shell[data-sidebar="collapsed"] .sidebar-nav-list + .sidebar-nav-list {
+    margin-top: var(--rhc-space-2);
+    padding-top: var(--rhc-space-2);
+    border-top: 1px solid var(--rhc-divider);
+}
+
 .sidebar-backdrop {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgba(27, 26, 25, 0.32);
+    background: rgba(22, 24, 29, 0.32);
     opacity: 0;
     transition: opacity var(--rhc-duration-slow) var(--rhc-ease);
 }
 
 /* --------------------------------------------------------------------------
-   5. Top header
+   7. Header
    -------------------------------------------------------------------------- */
 .app-topbar {
     display: flex;
@@ -453,7 +529,7 @@ a:hover {
     gap: var(--rhc-space-2);
     flex-shrink: 0;
     height: var(--rhc-topbar-height);
-    padding: 0 var(--rhc-space-3);
+    padding: 0 var(--rhc-space-4);
     background: var(--rhc-surface);
     border-bottom: 1px solid var(--rhc-border);
 }
@@ -471,13 +547,17 @@ a:hover {
 
 .topbar-title {
     font-size: var(--rhc-text-lg);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .topbar-subtitle {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
     font-size: var(--rhc-text-sm);
     color: var(--rhc-text-secondary);
     white-space: nowrap;
@@ -492,24 +572,89 @@ a:hover {
     margin-left: auto;
 }
 
-.topbar-date {
+/* Compact status block: network state over last-sync time. */
+.topbar-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.topbar-status-line {
     display: flex;
     align-items: center;
     gap: var(--rhc-space-half);
-    padding-right: var(--rhc-space-1);
-    font-size: var(--rhc-text-base);
-    color: var(--rhc-text-secondary);
-    white-space: nowrap;
+    font-size: var(--rhc-text-sm);
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-success);
+}
+
+.topbar-status-meta {
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
 }
 
 .topbar-divider {
     width: 1px;
-    height: 24px;
+    height: 28px;
     background: var(--rhc-border);
 }
 
 /* --------------------------------------------------------------------------
-   6. Search field
+   8. Live indicators
+   -------------------------------------------------------------------------- */
+.live-dot {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    background: var(--rhc-success);
+    border-radius: 50%;
+}
+
+/* Slow, low-contrast halo — present but never distracting. */
+.live-dot::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    color: var(--rhc-success);
+    opacity: 0;
+    animation: live-halo 2.8s var(--rhc-ease) infinite;
+}
+
+.live-dot-warning { background: var(--rhc-warning); }
+.live-dot-warning::after { color: var(--rhc-warning); }
+.live-dot-danger { background: var(--rhc-danger); }
+.live-dot-danger::after { color: var(--rhc-danger); }
+.live-dot-neutral { background: var(--rhc-text-tertiary); }
+.live-dot-neutral::after { animation: none; }
+
+@keyframes live-halo {
+    0% { opacity: 0.5; transform: scale(0.7); }
+    70% { opacity: 0; transform: scale(1.35); }
+    100% { opacity: 0; transform: scale(1.35); }
+}
+
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    padding: 2px var(--rhc-space-1);
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--rhc-success);
+    background: var(--rhc-success-subtle);
+    border-radius: var(--rhc-radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   9. Search trigger (opens the command palette)
    -------------------------------------------------------------------------- */
 .rhc-search {
     position: relative;
@@ -526,64 +671,134 @@ a:hover {
     pointer-events: none;
 }
 
-.rhc-search-input {
+.rhc-search-trigger {
+    display: flex;
+    align-items: center;
     width: 100%;
-    height: 32px;
-    padding: 0 var(--rhc-space-2) 0 30px;
+    height: 34px;
+    padding: 0 var(--rhc-space-1) 0 30px;
     font-family: inherit;
     font-size: var(--rhc-text-base);
-    color: var(--rhc-text);
-    background: var(--rhc-surface-alt);
+    text-align: left;
+    color: var(--rhc-text-tertiary);
+    background: var(--rhc-surface-sunken);
     border: 1px solid var(--rhc-border);
     border-radius: var(--rhc-radius-sm);
-    transition: border-color var(--rhc-duration) var(--rhc-ease), background-color var(--rhc-duration) var(--rhc-ease);
+    cursor: pointer;
+    transition: border-color var(--rhc-duration) var(--rhc-ease),
+                background-color var(--rhc-duration) var(--rhc-ease);
 }
 
-.rhc-search-input::placeholder {
-    color: var(--rhc-text-tertiary);
-}
-
-.rhc-search-input:hover {
+.rhc-search-trigger:hover {
+    background: var(--rhc-surface);
     border-color: var(--rhc-border-strong);
 }
 
-.rhc-search-input:focus {
+.rhc-kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    margin-left: auto;
+    padding: 1px 5px;
+    font-family: var(--rhc-font);
+    font-size: 10px;
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-text-tertiary);
     background: var(--rhc-surface);
-    border-color: var(--rhc-primary);
-    outline: none;
-    box-shadow: 0 0 0 1px var(--rhc-primary);
+    border: 1px solid var(--rhc-border-strong);
+    border-radius: 4px;
 }
 
 /* --------------------------------------------------------------------------
-   7. Buttons
+   10. Workspace mode switch
+   -------------------------------------------------------------------------- */
+.mode-switch {
+    display: inline-flex;
+    padding: 2px;
+    background: var(--rhc-surface-sunken);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.mode-switch-option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+    padding: 4px var(--rhc-space-2);
+    font-family: inherit;
+    font-size: var(--rhc-text-sm);
+    font-weight: var(--rhc-weight-medium);
+    color: var(--rhc-text-secondary);
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--rhc-duration) var(--rhc-ease),
+                color var(--rhc-duration) var(--rhc-ease),
+                box-shadow var(--rhc-duration) var(--rhc-ease);
+}
+
+.mode-switch-option:hover {
+    color: var(--rhc-text);
+}
+
+.mode-switch-option[aria-pressed="true"] {
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-text);
+    background: var(--rhc-surface);
+    box-shadow: var(--rhc-shadow-1);
+}
+
+/* Mode visibility — the only structural difference between the two modes. */
+.app-shell[data-workspace="executive"] .mode-operations-only,
+.app-shell[data-workspace="operations"] .mode-executive-only {
+    display: none !important;
+}
+
+/* Cross-fade the content region when the mode changes. */
+.app-content {
+    transition: opacity var(--rhc-duration-slow) var(--rhc-ease);
+}
+
+.app-shell.is-switching-mode .app-content {
+    opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   11. Buttons
    -------------------------------------------------------------------------- */
 .rhc-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--rhc-space-1);
-    height: 32px;
+    height: 34px;
     padding: 0 var(--rhc-space-2);
     font-family: inherit;
     font-size: var(--rhc-text-base);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-text);
     background: var(--rhc-surface);
     border: 1px solid var(--rhc-border-strong);
     border-radius: var(--rhc-radius-sm);
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color var(--rhc-duration) var(--rhc-ease), border-color var(--rhc-duration) var(--rhc-ease);
+    transition: background-color var(--rhc-duration) var(--rhc-ease),
+                border-color var(--rhc-duration) var(--rhc-ease),
+                box-shadow var(--rhc-duration) var(--rhc-ease);
 }
 
 .rhc-btn:hover {
     background: var(--rhc-surface-hover);
     text-decoration: none;
     color: var(--rhc-text);
+    box-shadow: var(--rhc-shadow-1);
 }
 
 .rhc-btn:active {
     background: var(--rhc-surface-active);
+    box-shadow: none;
 }
 
 .rhc-btn-primary {
@@ -606,20 +821,30 @@ a:hover {
 .rhc-btn-subtle {
     border-color: transparent;
     background: transparent;
-    font-weight: 400;
+    font-weight: var(--rhc-weight-regular);
+    box-shadow: none;
+}
+
+.rhc-btn-subtle:hover {
+    box-shadow: none;
 }
 
 .rhc-btn-block {
     width: 100%;
 }
 
-/* Square icon-only button used in the header and card toolbars. */
+.rhc-btn-sm {
+    height: 28px;
+    padding: 0 var(--rhc-space-1);
+    font-size: var(--rhc-text-sm);
+}
+
 .rhc-icon-btn {
     position: relative;
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     font-size: var(--rhc-text-md);
     color: var(--rhc-text-secondary);
@@ -627,7 +852,8 @@ a:hover {
     border: 1px solid transparent;
     border-radius: var(--rhc-radius-sm);
     cursor: pointer;
-    transition: background-color var(--rhc-duration) var(--rhc-ease), color var(--rhc-duration) var(--rhc-ease);
+    transition: background-color var(--rhc-duration) var(--rhc-ease),
+                color var(--rhc-duration) var(--rhc-ease);
 }
 
 .rhc-icon-btn:hover {
@@ -639,32 +865,31 @@ a:hover {
     background: var(--rhc-surface-active);
 }
 
-/* Unread count on the notifications button. */
 .rhc-badge-dot {
     position: absolute;
     top: 3px;
     right: 3px;
-    min-width: 15px;
-    height: 15px;
-    padding: 0 3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
     font-size: 9px;
-    font-weight: 600;
-    line-height: 15px;
+    font-weight: var(--rhc-weight-semibold);
+    line-height: 16px;
     text-align: center;
     color: var(--rhc-text-inverse);
     background: var(--rhc-danger);
-    border: 1.5px solid var(--rhc-surface);
+    border: 2px solid var(--rhc-surface);
     border-radius: var(--rhc-radius-pill);
 }
 
 /* --------------------------------------------------------------------------
-   8. User profile control
+   12. User profile
    -------------------------------------------------------------------------- */
 .topbar-profile {
     display: flex;
     align-items: center;
     gap: var(--rhc-space-1);
-    height: 36px;
+    height: 40px;
     padding: 0 var(--rhc-space-1);
     font-family: inherit;
     text-align: left;
@@ -683,13 +908,25 @@ a:hover {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     font-size: var(--rhc-text-xs);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-text-inverse);
     background: var(--rhc-secondary);
     border-radius: 50%;
+}
+
+.rhc-avatar-sm {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+}
+
+/* Neutral avatar used in tables so rosters stay calm. */
+.rhc-avatar-neutral {
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
 }
 
 .topbar-profile-text {
@@ -700,7 +937,7 @@ a:hover {
 
 .topbar-profile-name {
     font-size: var(--rhc-text-base);
-    font-weight: 600;
+    font-weight: var(--rhc-weight-semibold);
     color: var(--rhc-text);
 }
 
@@ -710,17 +947,25 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   9. Responsive shell behaviour
+   13. Responsive shell
    -------------------------------------------------------------------------- */
-
-/* Tablet and small laptop — collapse the rail to icons by default. */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .app-content {
-        padding: var(--rhc-space-2);
+        padding: var(--rhc-space-3) var(--rhc-space-3) var(--rhc-space-4);
     }
 
+    .app-topbar {
+        padding: 0 var(--rhc-space-3);
+    }
+}
+
+@media (max-width: 1200px) {
     .rhc-search {
         width: 200px;
+    }
+
+    .topbar-status {
+        display: none;
     }
 }
 
@@ -728,9 +973,16 @@ a:hover {
     .topbar-profile-text {
         display: none;
     }
+
+    .mode-switch-option span {
+        display: none;
+    }
+
+    .mode-switch-option {
+        padding: 4px var(--rhc-space-1);
+    }
 }
 
-/* Mobile — sidebar becomes an overlay drawer. */
 @media (max-width: 860px) {
     .app-sidebar {
         position: fixed;
@@ -744,7 +996,6 @@ a:hover {
         transition: transform var(--rhc-duration-slow) var(--rhc-ease);
     }
 
-    /* The collapsed/expanded width rule does not apply in drawer mode. */
     .app-shell[data-sidebar="collapsed"] .app-sidebar {
         width: var(--rhc-sidebar-width);
     }
@@ -764,6 +1015,12 @@ a:hover {
         padding-right: var(--rhc-space-1);
     }
 
+    .app-shell[data-sidebar="collapsed"] .sidebar-nav-list + .sidebar-nav-list {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+
     .app-shell[data-mobile-nav="open"] .app-sidebar {
         transform: translateX(0);
     }
@@ -773,7 +1030,6 @@ a:hover {
         opacity: 1;
     }
 
-    /* The rail toggle is meaningless in drawer mode. */
     .sidebar-footer {
         display: none;
     }
@@ -786,39 +1042,40 @@ a:hover {
         padding: 0 var(--rhc-space-2);
     }
 
-    .topbar-subtitle,
-    .topbar-date,
-    .topbar-divider {
+    .topbar-subtitle {
         display: none;
     }
 
-    /* Search collapses to an icon-width field to protect the title. */
     .rhc-search {
-        width: 40px;
+        width: 34px;
     }
 
-    .rhc-search-input {
-        padding-right: var(--rhc-space-half);
-        cursor: pointer;
+    .rhc-search-trigger {
+        padding-right: 0;
     }
 
-    .rhc-search-input:focus {
-        position: absolute;
-        right: 0;
-        width: 220px;
-        cursor: text;
-        z-index: 10;
+    .rhc-search-label,
+    .rhc-kbd {
+        display: none;
+    }
+
+    .app-content {
+        padding: var(--rhc-space-2) var(--rhc-space-2) var(--rhc-space-4);
     }
 }
 
 @media (max-width: 560px) {
     .app-content {
-        padding: var(--rhc-space-1);
+        padding: var(--rhc-space-1) var(--rhc-space-1) var(--rhc-space-3);
+    }
+
+    .mode-switch {
+        display: none;
     }
 }
 
 /* --------------------------------------------------------------------------
-   10. Reduced motion
+   14. Reduced motion
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
     *,

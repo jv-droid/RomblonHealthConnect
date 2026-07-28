@@ -98,27 +98,27 @@ public static class DatabaseSeeder
                 "Emergency, Laboratory, Maternity, Out-patient", now.AddMinutes(-11)),
 
             New("adh-alcantara", "Alcantara District Hospital", FacilityType.District, "Alcantara",
-                "Poblacion, Alcantara, Romblon", "(042) 567 3341", 12.2333, 122.0667,
+                "Poblacion, Alcantara, Romblon", "(042) 567 3341", 12.2582, 122.0543,
                 FacilityStatus.Online, true, 40, 4,
                 "Emergency, Laboratory, Maternity", now.AddMinutes(-8)),
 
             New("cdh-cajidiocan", "Cajidiocan District Hospital", FacilityType.District, "Cajidiocan",
-                "Poblacion, Cajidiocan, Sibuyan Island", "(042) 567 4419", 12.4394, 122.5308,
+                "Poblacion, Cajidiocan, Sibuyan Island", "(042) 567 4419", 12.3687, 122.6865,
                 FacilityStatus.Limited, true, 35, 7,
                 "Emergency, Laboratory, Out-patient", now.AddMinutes(-24)),
 
             New("sfdh-sanfernando", "San Fernando District Hospital", FacilityType.District, "San Fernando",
-                "Poblacion, San Fernando, Sibuyan Island", "(042) 567 4802", 12.3175, 122.5461,
+                "Poblacion, San Fernando, Sibuyan Island", "(042) 567 4802", 12.3028, 122.6006,
                 FacilityStatus.Online, true, 30, 9,
                 "Emergency, Laboratory, Maternity", now.AddMinutes(-15)),
 
             New("rhu-sanagustin", "San Agustin Rural Health Unit", FacilityType.RuralHealthUnit, "San Agustin",
-                "Poblacion, San Agustin, Tablas Island", "(042) 567 6120", 12.6167, 122.1333,
+                "Poblacion, San Agustin, Tablas Island", "(042) 567 6120", 12.5669, 122.1336,
                 FacilityStatus.Online, false, 12, 6,
                 "Out-patient, Maternal Health, Immunization", now.AddMinutes(-19)),
 
             New("rhu-sanandres", "San Andres Rural Health Unit", FacilityType.RuralHealthUnit, "San Andres",
-                "Poblacion, San Andres, Tablas Island", "(042) 567 6255", 12.5167, 122.0333,
+                "Poblacion, San Andres, Tablas Island", "(042) 567 6255", 12.5198, 122.0098,
                 FacilityStatus.Online, false, 10, 5,
                 "Out-patient, Immunization", now.AddMinutes(-27)),
 
@@ -128,7 +128,7 @@ public static class DatabaseSeeder
                 "Out-patient, Maternal Health, Immunization, Laboratory", now.AddMinutes(-5)),
 
             New("rhu-magdiwang", "Magdiwang Rural Health Unit", FacilityType.RuralHealthUnit, "Magdiwang",
-                "Poblacion, Magdiwang, Sibuyan Island", "(042) 567 4703", 12.4972, 122.5217,
+                "Poblacion, Magdiwang, Sibuyan Island", "(042) 567 4703", 12.4913, 122.5147,
                 FacilityStatus.Online, false, 10, 4,
                 "Out-patient, Maternal Health", now.AddMinutes(-31)),
 
@@ -138,12 +138,12 @@ public static class DatabaseSeeder
                 "Out-patient, Immunization", now.AddMinutes(-22)),
 
             New("rhu-santafe", "Santa Fe Rural Health Unit", FacilityType.RuralHealthUnit, "Santa Fe",
-                "Poblacion, Santa Fe, Tablas Island", "(042) 567 5177", 12.1500, 122.0333,
+                "Poblacion, Santa Fe, Tablas Island", "(042) 567 5177", 12.1543, 121.9954,
                 FacilityStatus.Offline, false, 8, 2,
                 "Out-patient", now.AddMinutes(-96)),
 
             New("rhu-corcuera", "Corcuera Rural Health Unit", FacilityType.RuralHealthUnit, "Corcuera",
-                "Poblacion, Corcuera, Simara Island", "(042) 567 6488", 12.6333, 122.1667,
+                "Poblacion, Corcuera, Simara Island", "(042) 567 6488", 12.7841, 122.0475,
                 FacilityStatus.Limited, false, 8, 3,
                 "Out-patient", now.AddMinutes(-44)),
 

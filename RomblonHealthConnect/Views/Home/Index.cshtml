@@ -1,6 +1,6 @@
 @{
-    ViewData["Title"] = "Health Network Overview";
-    ViewData["Subtitle"] = "Provincial hospital and referral monitoring";
+    ViewData["Title"] = "Provincial Health Network";
+    ViewData["Subtitle"] = "Live facility and referral monitoring";
     ViewData["ActiveNav"] = "dashboard";
 }
 
@@ -9,93 +9,168 @@
     <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
 }
 
-<div class="rhc-notice" role="note">
-    <span class="rhc-notice-icon" aria-hidden="true"><i class="fa-solid fa-circle-info"></i></span>
-    <span>
-        <strong>Prototype interface.</strong>
-        All facilities, doctors, referrals, and availability figures shown below are illustrative
-        sample data used for design review. No live health records are connected.
+@*  Reading order, top to bottom:
+    1. critical system status  2. executive overview  3. the map
+    4. operational lists       5. supporting detail                        *@
+
+<!-- 1 · Critical system status -->
+<div class="status-strip dash-fade dash-fade-1" id="statusStrip" role="status" data-severity="normal">
+    <span class="status-strip-primary">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span data-status-headline>All systems operational</span>
+    </span>
+
+    <span class="status-strip-divider" aria-hidden="true"></span>
+
+    <span class="status-strip-detail">
+        <i class="fa-regular fa-hospital" aria-hidden="true"></i>
+        <span data-status-reporting>&mdash;</span> facilities reporting
+    </span>
+
+    <span class="status-strip-divider" aria-hidden="true"></span>
+
+    <span class="status-strip-detail">
+        <i class="fa-solid fa-truck-medical" aria-hidden="true"></i>
+        <span data-status-emergency>&mdash;</span> emergency-capable
+    </span>
+
+    <span class="status-strip-trailing">
+        <span class="live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>
+        <span>Updated <span data-status-updated>just now</span></span>
     </span>
 </div>
 
-<!-- Summary metrics -->
-<section aria-labelledby="metrics-heading">
-    <h2 class="rhc-visually-hidden" id="metrics-heading">Network summary</h2>
+<!-- 2 · Executive overview -->
+<section class="dash-section dash-fade dash-fade-2" aria-labelledby="overview-heading">
+    <div class="dash-section-header">
+        <h2 class="dash-section-title" id="overview-heading">Executive Overview</h2>
+        <span class="dash-section-hint">Province-wide position at a glance</span>
+    </div>
 
-    <div class="metric-grid">
-        <article class="metric-card">
-            <span class="metric-icon metric-icon-primary" aria-hidden="true">
-                <i class="fa-regular fa-hospital"></i>
-            </span>
-            <div class="metric-content">
-                <span class="metric-label">Total Hospitals</span>
-                <span class="metric-value-row">
-                    <span class="metric-value" data-metric="totalHospitals">&mdash;</span>
-                    <span class="metric-trend metric-trend-flat" data-metric-trend="totalHospitals"></span>
+    <div class="kpi-grid">
+        <article class="kpi-card">
+            <div class="kpi-head">
+                <span class="kpi-icon kpi-icon-primary" aria-hidden="true"><i class="fa-regular fa-hospital"></i></span>
+                <span class="kpi-label">Hospitals Connected</span>
+            </div>
+            <div class="kpi-value-row">
+                <span class="kpi-value" data-kpi="hospitals">&mdash;</span>
+                <span class="kpi-unit" data-kpi-unit="hospitals"></span>
+            </div>
+            <p class="kpi-support" data-kpi-support="hospitals">Across Romblon Province</p>
+            <div class="kpi-foot">
+                <span class="kpi-timestamp">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span data-kpi-time="hospitals">&mdash;</span>
                 </span>
-                <span class="metric-caption" data-metric-caption="totalHospitals"></span>
+                <span class="kpi-trend" data-kpi-trend="hospitals"></span>
             </div>
         </article>
 
-        <article class="metric-card">
-            <span class="metric-icon metric-icon-success" aria-hidden="true">
-                <i class="fa-solid fa-user-doctor"></i>
-            </span>
-            <div class="metric-content">
-                <span class="metric-label">Available Doctors</span>
-                <span class="metric-value-row">
-                    <span class="metric-value" data-metric="availableDoctors">&mdash;</span>
-                    <span class="metric-trend" data-metric-trend="availableDoctors"></span>
+        <article class="kpi-card">
+            <div class="kpi-head">
+                <span class="kpi-icon kpi-icon-success" aria-hidden="true"><i class="fa-solid fa-user-doctor"></i></span>
+                <span class="kpi-label">Doctors Available</span>
+            </div>
+            <div class="kpi-value-row">
+                <span class="kpi-value" data-kpi="doctors">&mdash;</span>
+            </div>
+            <p class="kpi-support" data-kpi-support="doctors">Currently on duty</p>
+            <div class="kpi-foot">
+                <span class="kpi-timestamp">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span data-kpi-time="doctors">&mdash;</span>
                 </span>
-                <span class="metric-caption" data-metric-caption="availableDoctors"></span>
+                <span class="kpi-trend" data-kpi-trend="doctors"></span>
             </div>
         </article>
 
-        <article class="metric-card">
-            <span class="metric-icon metric-icon-info" aria-hidden="true">
-                <i class="fa-regular fa-share-from-square"></i>
-            </span>
-            <div class="metric-content">
-                <span class="metric-label">Active Referrals</span>
-                <span class="metric-value-row">
-                    <span class="metric-value" data-metric="activeReferrals">&mdash;</span>
-                    <span class="metric-trend" data-metric-trend="activeReferrals"></span>
+        <article class="kpi-card">
+            <div class="kpi-head">
+                <span class="kpi-icon kpi-icon-warning" aria-hidden="true"><i class="fa-regular fa-share-from-square"></i></span>
+                <span class="kpi-label">Active Referrals</span>
+            </div>
+            <div class="kpi-value-row">
+                <span class="kpi-value" data-kpi="referrals">&mdash;</span>
+            </div>
+            <p class="kpi-support" data-kpi-support="referrals">Awaiting acceptance</p>
+            <div class="kpi-foot">
+                <span class="kpi-timestamp">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span data-kpi-time="referrals">&mdash;</span>
                 </span>
-                <span class="metric-caption" data-metric-caption="activeReferrals"></span>
+                <span class="kpi-trend" data-kpi-trend="referrals"></span>
             </div>
         </article>
 
-        <article class="metric-card">
-            <span class="metric-icon metric-icon-accent" aria-hidden="true">
-                <i class="fa-solid fa-stethoscope"></i>
-            </span>
-            <div class="metric-content">
-                <span class="metric-label">Specialists Available</span>
-                <span class="metric-value-row">
-                    <span class="metric-value" data-metric="specialists">&mdash;</span>
-                    <span class="metric-trend" data-metric-trend="specialists"></span>
+        <article class="kpi-card">
+            <div class="kpi-head">
+                <span class="kpi-icon" aria-hidden="true"><i class="fa-solid fa-stethoscope"></i></span>
+                <span class="kpi-label">Specialists</span>
+            </div>
+            <div class="kpi-value-row">
+                <span class="kpi-value" data-kpi="specialists">&mdash;</span>
+            </div>
+            <p class="kpi-support" data-kpi-support="specialists">Across all facilities</p>
+            <div class="kpi-foot">
+                <span class="kpi-timestamp">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span data-kpi-time="specialists">&mdash;</span>
                 </span>
-                <span class="metric-caption" data-metric-caption="specialists"></span>
+                <span class="kpi-trend" data-kpi-trend="specialists"></span>
             </div>
         </article>
     </div>
 </section>
 
-<!-- Map and overview -->
-<div class="dashboard-grid">
+<!-- 3 · Today's network overview, then the map -->
+<section class="dash-section dash-fade dash-fade-3" aria-labelledby="network-heading">
+    <div class="dash-section-header">
+        <h2 class="dash-section-title" id="network-heading">Romblon Health Network</h2>
+        <span class="dash-section-hint">Interactive province map</span>
+        <div class="dash-section-actions">
+            <button type="button" class="rhc-btn rhc-btn-sm" id="mapResetView">
+                <i class="fa-solid fa-crosshairs" aria-hidden="true"></i> Province view
+            </button>
+        </div>
+    </div>
 
-    <section class="rhc-card map-card" aria-labelledby="map-heading">
-        <div class="rhc-card-header">
-            <div class="rhc-card-heading">
-                <h2 class="rhc-card-title" id="map-heading">Romblon Health Network Map</h2>
-                <p class="rhc-card-subtitle">
-                    <span data-map-count>&mdash;</span> facilities across 17 municipalities
-                </p>
+    <div class="exec-summary" id="execSummary">
+        <div>
+            <div class="exec-summary-heading">
+                <h3 class="exec-summary-title">Today&rsquo;s Network Overview</h3>
+                <span class="rhc-meta" data-summary-date></span>
             </div>
-            <div class="rhc-card-tools">
-                <button type="button" class="rhc-icon-btn" id="mapResetView" aria-label="Reset map to province view">
-                    <i class="fa-solid fa-crosshairs" aria-hidden="true"></i>
-                </button>
+            <ul class="exec-summary-list" data-summary-list>
+                <li class="exec-summary-item">
+                    <span class="exec-summary-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                    <span>Loading network status&hellip;</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="exec-summary-aside">
+            <span class="rhc-eyebrow">Provincial bed capacity</span>
+            <span class="kpi-value" data-summary-beds>&mdash;</span>
+            <span class="rhc-caption" data-summary-beds-note>&mdash;</span>
+        </div>
+    </div>
+
+    <div class="map-hero dash-gap-top">
+        <div class="map-hero-header">
+            <div class="map-hero-heading">
+                <span class="map-hero-title">
+                    Provincial Facility Map
+                    <span class="live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>
+                </span>
+                <span class="map-hero-subtitle">
+                    <span data-map-count>&mdash;</span> facilities · 17 municipalities
+                </span>
+            </div>
+            <div class="map-hero-tools">
+                <span class="map-flow-key mode-executive-only">
+                    <span class="map-flow-line" aria-hidden="true"></span> Active referral
+                </span>
                 <button type="button" class="rhc-icon-btn" id="mapToggleLegend"
                         aria-controls="mapLegend" aria-expanded="true" aria-label="Toggle map legend">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
@@ -103,49 +178,57 @@
             </div>
         </div>
 
-        <div class="rhc-card-body rhc-card-body-flush">
-            <div class="map-shell">
-                <div class="map-canvas" id="healthMap" role="application"
-                     aria-label="Interactive map of health facilities in Romblon province"></div>
+        <div class="map-shell">
+            <div class="map-canvas" id="healthMap" role="application"
+                 aria-label="Interactive map of health facilities in Romblon province"></div>
 
-                <div class="map-legend" id="mapLegend">
-                    <p class="map-legend-title">Facility type</p>
-                    <ul class="map-legend-list">
-                        <li class="map-legend-item">
-                            <span class="map-legend-swatch map-legend-swatch-public" aria-hidden="true"></span>
-                            Provincial / Public
-                        </li>
-                        <li class="map-legend-item">
-                            <span class="map-legend-swatch map-legend-swatch-district" aria-hidden="true"></span>
-                            District hospital
-                        </li>
-                        <li class="map-legend-item">
-                            <span class="map-legend-swatch map-legend-swatch-rhu" aria-hidden="true"></span>
-                            Rural health unit
-                        </li>
-                        <li class="map-legend-item">
-                            <span class="map-legend-swatch map-legend-swatch-private" aria-hidden="true"></span>
-                            Private facility
-                        </li>
-                    </ul>
-                </div>
+            <div class="map-legend" id="mapLegend">
+                <p class="map-legend-title">Facility type</p>
+                <ul class="map-legend-list">
+                    <li class="map-legend-item">
+                        <span class="map-legend-swatch map-legend-swatch-public" aria-hidden="true"></span>
+                        Provincial / Public
+                    </li>
+                    <li class="map-legend-item">
+                        <span class="map-legend-swatch map-legend-swatch-district" aria-hidden="true"></span>
+                        District hospital
+                    </li>
+                    <li class="map-legend-item">
+                        <span class="map-legend-swatch map-legend-swatch-rhu" aria-hidden="true"></span>
+                        Rural health unit
+                    </li>
+                    <li class="map-legend-item">
+                        <span class="map-legend-swatch map-legend-swatch-private" aria-hidden="true"></span>
+                        Private facility
+                    </li>
+                </ul>
+                <p class="map-legend-note">
+                    Pulsing ring marks emergency capability.<br />
+                    Dashed ring means nearby facilities were fanned apart &mdash; zoom in for exact positions.
+                </p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Right-side overview -->
+<!-- 4 · Operational overview -->
+<section class="dash-section dash-fade dash-fade-4" aria-labelledby="operations-heading">
+    <div class="dash-section-header">
+        <h2 class="dash-section-title" id="operations-heading">Operational Overview</h2>
+        <span class="dash-section-hint">System, activity, and staffing</span>
+    </div>
+
     <aside class="overview-panel" aria-label="Network overview">
-
-        <section class="rhc-card overview-section" aria-labelledby="status-heading">
-            <h2 class="overview-section-title" id="status-heading">
+        <section class="rhc-card" aria-labelledby="status-heading">
+            <h3 class="overview-section-title" id="status-heading">
                 <i class="fa-solid fa-signal" aria-hidden="true"></i> System Status
-            </h2>
+            </h3>
             <ul class="stat-list">
                 <li class="stat-row">
                     <span class="stat-row-label">Network</span>
                     <span class="stat-row-value">
                         <span class="status-live">
-                            <span class="status-live-dot" aria-hidden="true"></span> Online
+                            <span class="live-dot" aria-hidden="true"></span> Online
                         </span>
                     </span>
                 </li>
@@ -160,10 +243,10 @@
             </ul>
         </section>
 
-        <section class="rhc-card overview-section" aria-labelledby="activity-heading">
-            <h2 class="overview-section-title" id="activity-heading">
-                <i class="fa-regular fa-clock" aria-hidden="true"></i> Today's Activity
-            </h2>
+        <section class="rhc-card" aria-labelledby="activity-heading">
+            <h3 class="overview-section-title" id="activity-heading">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i> Today&rsquo;s Activity
+            </h3>
             <ul class="stat-list">
                 <li class="stat-row">
                     <span class="stat-row-label">Referrals created</span>
@@ -180,10 +263,10 @@
             </ul>
         </section>
 
-        <section class="rhc-card overview-section" aria-labelledby="availability-heading">
-            <h2 class="overview-section-title" id="availability-heading">
+        <section class="rhc-card" aria-labelledby="availability-heading">
+            <h3 class="overview-section-title" id="availability-heading">
                 <i class="fa-solid fa-user-doctor" aria-hidden="true"></i> Doctor Availability
-            </h2>
+            </h3>
             <ul class="stat-list">
                 <li class="stat-row">
                     <span class="stat-row-label">
@@ -204,120 +287,190 @@
                     <span class="stat-row-value" data-availability="unavailable">&mdash;</span>
                 </li>
             </ul>
+            <div class="stat-list">
+                <div class="share-bar" role="img" aria-label="Doctor availability split" data-availability-bar></div>
+            </div>
         </section>
     </aside>
-</div>
+</section>
 
-<!-- Detail tables -->
-<div class="bottom-grid">
+<!-- 5 · Supporting detail (Operations mode only) -->
+<section class="dash-section mode-operations-only" aria-labelledby="detail-heading">
+    <div class="dash-section-header">
+        <h2 class="dash-section-title" id="detail-heading">Supporting Detail</h2>
+        <span class="dash-section-hint">Referrals, roster, and facility status</span>
+    </div>
 
-    <section class="rhc-card" aria-labelledby="referrals-heading">
-        <div class="rhc-card-header">
-            <div class="rhc-card-heading">
-                <h2 class="rhc-card-title" id="referrals-heading">Recent Referrals</h2>
-                <p class="rhc-card-subtitle">Latest transfers across the network</p>
+    <div class="bottom-grid">
+        <section class="rhc-card" aria-labelledby="referrals-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h3 class="rhc-card-title" id="referrals-heading">Recent Referrals</h3>
+                    <p class="rhc-card-subtitle">Latest transfers across the network</p>
+                </div>
+                <div class="rhc-card-tools">
+                    <a class="rhc-btn rhc-btn-subtle rhc-btn-sm" asp-controller="Referrals" asp-action="Index">View all</a>
+                </div>
             </div>
-        </div>
-        <div class="rhc-card-body rhc-card-body-flush">
-            <div class="rhc-table-wrap rhc-scroll">
-                <table class="rhc-table">
-                    <caption class="rhc-visually-hidden">Recent patient referrals with origin, destination, status, and time</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Reference</th>
-                            <th scope="col">Route</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody data-table="referrals"></tbody>
-                </table>
+            <div class="rhc-card-body rhc-card-body-flush">
+                <div class="rhc-table-wrap rhc-scroll">
+                    <table class="rhc-table">
+                        <caption class="rhc-visually-hidden">Recent referrals with origin, destination, status, and time</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Reference</th>
+                                <th scope="col">Route</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="referrals"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="rhc-card" aria-labelledby="doctors-heading">
-        <div class="rhc-card-header">
-            <div class="rhc-card-heading">
-                <h2 class="rhc-card-title" id="doctors-heading">Doctors Available Today</h2>
-                <p class="rhc-card-subtitle">On-duty roster by facility</p>
+        <section class="rhc-card" aria-labelledby="doctors-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h3 class="rhc-card-title" id="doctors-heading">Doctors Available Today</h3>
+                    <p class="rhc-card-subtitle">On-duty roster by facility</p>
+                </div>
             </div>
-        </div>
-        <div class="rhc-card-body rhc-card-body-flush">
-            <div class="rhc-table-wrap rhc-scroll">
-                <table class="rhc-table">
-                    <caption class="rhc-visually-hidden">Doctors on duty today with specialty, hospital, and availability</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Doctor</th>
-                            <th scope="col">Hospital</th>
-                            <th scope="col">Availability</th>
-                        </tr>
-                    </thead>
-                    <tbody data-table="doctors"></tbody>
-                </table>
+            <div class="rhc-card-body rhc-card-body-flush">
+                <div class="rhc-table-wrap rhc-scroll">
+                    <table class="rhc-table">
+                        <caption class="rhc-visually-hidden">Doctors on duty today with specialty, hospital, and availability</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Doctor</th>
+                                <th scope="col">Hospital</th>
+                                <th scope="col">Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="doctors"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="rhc-card" aria-labelledby="facilities-heading">
-        <div class="rhc-card-header">
-            <div class="rhc-card-heading">
-                <h2 class="rhc-card-title" id="facilities-heading">Facility Status</h2>
-                <p class="rhc-card-subtitle">Connectivity and capacity</p>
+        <section class="rhc-card" aria-labelledby="facilities-heading">
+            <div class="rhc-card-header">
+                <div class="rhc-card-heading">
+                    <h3 class="rhc-card-title" id="facilities-heading">Facility Status</h3>
+                    <p class="rhc-card-subtitle">Connectivity and capacity</p>
+                </div>
             </div>
-        </div>
-        <div class="rhc-card-body rhc-card-body-flush">
-            <div class="rhc-table-wrap rhc-scroll">
-                <table class="rhc-table">
-                    <caption class="rhc-visually-hidden">Facility connectivity, emergency capability, and available beds</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Facility</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Emergency</th>
-                            <th scope="col">Beds</th>
-                        </tr>
-                    </thead>
-                    <tbody data-table="facilities"></tbody>
-                </table>
+            <div class="rhc-card-body rhc-card-body-flush">
+                <div class="rhc-table-wrap rhc-scroll">
+                    <table class="rhc-table">
+                        <caption class="rhc-visually-hidden">Facility connectivity, emergency capability, and available beds</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Facility</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Emergency</th>
+                                <th scope="col">Beds</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="facilities"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
+</section>
 
-<!-- Hospital details drawer -->
-@* Visibility for both elements is driven by the .is-open class in dashboard.css. *@
+<!-- Facility drawer -->
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
 <aside class="hospital-drawer" id="hospitalDrawer" role="dialog" aria-modal="true"
        aria-labelledby="drawerTitle" tabindex="-1">
 
     <header class="drawer-header">
-        <div class="drawer-header-text">
-            <h2 class="drawer-title" id="drawerTitle">Facility</h2>
-            <p class="drawer-subtitle">
-                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-                <span data-drawer="municipality"></span>
-            </p>
+        <div class="drawer-header-top">
+            <span class="drawer-type-mark" data-drawer="typeMark" aria-hidden="true">
+                <i class="fa-solid fa-hospital"></i>
+            </span>
+            <div class="drawer-header-text">
+                <h2 class="drawer-title" id="drawerTitle">Facility</h2>
+                <p class="drawer-subtitle">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span data-drawer="municipality"></span>
+                </p>
+            </div>
+            <button type="button" class="rhc-icon-btn drawer-close" id="drawerClose" aria-label="Close facility details">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
         </div>
-        <button type="button" class="rhc-icon-btn drawer-close" id="drawerClose" aria-label="Close facility details">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
+
+        <div class="drawer-header-badges">
+            <span data-drawer="statusBadge"></span>
+            <span data-drawer="emergencyBadge"></span>
+            <span data-drawer="typeBadge"></span>
+        </div>
     </header>
 
     <div class="drawer-body rhc-scroll">
 
         <section class="drawer-section">
-            <p class="drawer-section-label">Status</p>
-            <div class="chip-group">
-                <span data-drawer="statusBadge"></span>
-                <span data-drawer="emergencyBadge"></span>
+            <p class="drawer-section-label">
+                <i class="fa-solid fa-bed" aria-hidden="true"></i> Bed occupancy
+            </p>
+            <div class="occupancy">
+                <div class="occupancy-head">
+                    <span class="occupancy-value" data-drawer="bedsAvailable">&mdash;</span>
+                    <span class="occupancy-total" data-drawer="bedsTotal"></span>
+                    <span class="occupancy-pct" data-drawer="occupancyPct"></span>
+                </div>
+                <div class="occupancy-track">
+                    <div class="occupancy-fill" data-drawer="occupancyFill"></div>
+                </div>
+                <p class="occupancy-note" data-drawer="occupancyNote"></p>
             </div>
         </section>
 
         <section class="drawer-section">
-            <p class="drawer-section-label">Facility information</p>
+            <p class="drawer-section-label">
+                <i class="fa-solid fa-user-doctor" aria-hidden="true"></i> Staffing today
+            </p>
+            <div class="drawer-stat-grid">
+                <div class="drawer-stat">
+                    <p class="drawer-stat-value" data-drawer="doctorsAvailable">&mdash;</p>
+                    <p class="drawer-stat-label">Doctors available</p>
+                </div>
+                <div class="drawer-stat">
+                    <p class="drawer-stat-value" data-drawer="specialistCount">&mdash;</p>
+                    <p class="drawer-stat-label">Specializations</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="drawer-section">
+            <p class="drawer-section-label">
+                <i class="fa-solid fa-stethoscope" aria-hidden="true"></i> Specialists on site
+            </p>
+            <div class="chip-group" data-drawer="specializations"></div>
+        </section>
+
+        <section class="drawer-section">
+            <p class="drawer-section-label">
+                <i class="fa-regular fa-share-from-square" aria-hidden="true"></i> Current referrals
+            </p>
+            <ul class="activity-list" data-drawer="referrals"></ul>
+        </section>
+
+        <section class="drawer-section">
+            <p class="drawer-section-label">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i> Today&rsquo;s activity
+            </p>
+            <ul class="activity-list" data-drawer="activity"></ul>
+        </section>
+
+        <section class="drawer-section">
+            <p class="drawer-section-label">
+                <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Facility information
+            </p>
             <dl class="info-list">
                 <div class="info-row">
                     <dt class="info-row-label">Facility type</dt>
@@ -339,37 +492,35 @@
         </section>
 
         <section class="drawer-section">
-            <p class="drawer-section-label">Capacity</p>
-            <div class="drawer-stat-grid">
-                <div class="drawer-stat">
-                    <p class="drawer-stat-value" data-drawer="doctorsAvailable">&mdash;</p>
-                    <p class="drawer-stat-label">Doctors available</p>
-                </div>
-                <div class="drawer-stat">
-                    <p class="drawer-stat-value" data-drawer="bedsAvailable">&mdash;</p>
-                    <p class="drawer-stat-label">Beds available</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="drawer-section">
-            <p class="drawer-section-label">Available specializations</p>
-            <div class="chip-group" data-drawer="specializations"></div>
-        </section>
-
-        <section class="drawer-section">
-            <p class="drawer-updated">
-                <i class="fa-regular fa-clock" aria-hidden="true"></i>
-                Last updated <span data-drawer="lastUpdated"></span>
+            <p class="drawer-section-label">
+                <i class="fa-solid fa-bolt" aria-hidden="true"></i> Quick actions
             </p>
+            <div class="quick-actions">
+                <button type="button" class="quick-action quick-action-primary" id="drawerStartReferral">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+                    Start referral
+                </button>
+                <button type="button" class="quick-action" id="drawerViewDetails">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="fa-regular fa-rectangle-list"></i></span>
+                    View details
+                </button>
+                <a class="quick-action" id="drawerCall" href="#">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
+                    Call facility
+                </a>
+                <a class="quick-action" id="drawerDirections" href="#" target="_blank" rel="noopener">
+                    <span class="quick-action-icon" aria-hidden="true"><i class="fa-solid fa-diamond-turn-right"></i></span>
+                    Directions
+                </a>
+            </div>
         </section>
     </div>
 
     <footer class="drawer-footer">
-        <button type="button" class="rhc-btn" id="drawerViewDetails">View details</button>
-        <button type="button" class="rhc-btn rhc-btn-primary" id="drawerStartReferral">
-            <i class="fa-solid fa-plus" aria-hidden="true"></i> Start referral
-        </button>
+        <span class="drawer-updated">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            Updated <span data-drawer="lastUpdated"></span>
+        </span>
     </footer>
 </aside>
 

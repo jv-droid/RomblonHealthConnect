@@ -61,6 +61,59 @@ public class HospitalRepository : IHospitalRepository
             .OrderBy(m => m)
             .ToListAsync(cancellationToken);
     }
+
+    /* -- management ---------------------------------------------------- */
+
+    public async Task<IReadOnlyList<Hospital>> GetAllIncludingInactiveAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Hospitals
+            .OrderBy(h => h.Municipality)
+            .ThenBy(h => h.Name)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Hospital?> GetForUpdateAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Hospitals.FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
+    }
+
+    public async Task<bool> CodeExistsAsync(
+        string code,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Hospitals
+            .AnyAsync(h => h.Code == code && (!excludeId.HasValue || h.Id != excludeId.Value), cancellationToken);
+    }
+
+    public async Task<(int Referrals, int Doctors)> GetUsageAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var referrals = await _context.Referrals
+            .CountAsync(r => r.OriginHospitalId == id || r.DestinationHospitalId == id, cancellationToken);
+
+        var doctors = await _context.Doctors.CountAsync(d => d.HospitalId == id, cancellationToken);
+
+        return (referrals, doctors);
+    }
+
+    public async Task AddAsync(Hospital hospital, CancellationToken cancellationToken = default)
+    {
+        await _context.Hospitals.AddAsync(hospital, cancellationToken);
+    }
+
+    public void Remove(Hospital hospital)
+    {
+        _context.Hospitals.Remove(hospital);
+    }
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
 }
 
 public class DoctorRepository : IDoctorRepository

@@ -1,0 +1,220 @@
+/* ==========================================================================
+   Romblon HealthConnect — Global command palette (Ctrl + K)
+   Centred overlay search across facilities, staff, referrals, and navigation.
+   ========================================================================== */
+
+.palette-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(22, 24, 29, 0.32);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--rhc-duration) var(--rhc-ease),
+                visibility var(--rhc-duration);
+}
+
+.palette-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.palette {
+    position: fixed;
+    top: 14vh;
+    left: 50%;
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    width: min(640px, calc(100vw - var(--rhc-space-4)));
+    max-height: 64vh;
+    background: var(--rhc-surface);
+    border: 1px solid var(--rhc-border);
+    border-radius: var(--rhc-radius-lg);
+    box-shadow: var(--rhc-shadow-4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -8px) scale(0.98);
+    transition: opacity var(--rhc-duration) var(--rhc-ease-out),
+                transform var(--rhc-duration) var(--rhc-ease-out),
+                visibility var(--rhc-duration);
+}
+
+.palette.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0) scale(1);
+}
+
+/* Input row */
+.palette-header {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    padding: var(--rhc-space-2) var(--rhc-space-3);
+    border-bottom: 1px solid var(--rhc-divider);
+}
+
+.palette-icon {
+    flex-shrink: 0;
+    font-size: var(--rhc-text-lg);
+    color: var(--rhc-text-tertiary);
+}
+
+.palette-input {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: var(--rhc-text-lg);
+    color: var(--rhc-text);
+    background: transparent;
+    border: 0;
+    outline: none;
+}
+
+.palette-input::placeholder {
+    color: var(--rhc-text-tertiary);
+}
+
+.palette-esc {
+    flex-shrink: 0;
+}
+
+/* Results */
+.palette-results {
+    margin: 0;
+    padding: var(--rhc-space-1);
+    overflow-y: auto;
+    list-style: none;
+}
+
+.palette-group-label {
+    padding: var(--rhc-space-2) var(--rhc-space-2) var(--rhc-space-half);
+    font-size: var(--rhc-text-xs);
+    font-weight: var(--rhc-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rhc-text-tertiary);
+}
+
+.palette-item {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    width: 100%;
+    padding: var(--rhc-space-1) var(--rhc-space-2);
+    font-family: inherit;
+    text-align: left;
+    color: var(--rhc-text);
+    background: transparent;
+    border: 0;
+    border-radius: var(--rhc-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--rhc-duration-fast) var(--rhc-ease);
+}
+
+.palette-item:hover {
+    background: var(--rhc-surface-hover);
+    text-decoration: none;
+}
+
+/* Keyboard cursor. Mirrors hover so both feel like the same affordance. */
+.palette-item.is-active {
+    background: var(--rhc-surface-active);
+}
+
+.palette-item.is-active::after {
+    content: "\f30b";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-left: auto;
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-tertiary);
+}
+
+.palette-item-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    font-size: var(--rhc-text-base);
+    color: var(--rhc-text-secondary);
+    background: var(--rhc-neutral-subtle);
+    border-radius: var(--rhc-radius-sm);
+}
+
+.palette-item-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.palette-item-title {
+    display: block;
+    font-size: var(--rhc-text-md);
+    font-weight: var(--rhc-weight-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.palette-item-meta {
+    display: block;
+    font-size: var(--rhc-text-sm);
+    color: var(--rhc-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Matched substring within a result title. */
+.palette-match {
+    font-weight: var(--rhc-weight-semibold);
+    color: var(--rhc-primary);
+    background: transparent;
+}
+
+.palette-empty {
+    padding: var(--rhc-space-5) var(--rhc-space-3);
+    text-align: center;
+    color: var(--rhc-text-secondary);
+}
+
+.palette-empty-icon {
+    display: block;
+    margin-bottom: var(--rhc-space-1);
+    font-size: 24px;
+    color: var(--rhc-border-strong);
+}
+
+/* Footer hints */
+.palette-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--rhc-space-2);
+    flex-shrink: 0;
+    padding: var(--rhc-space-1) var(--rhc-space-3);
+    font-size: var(--rhc-text-xs);
+    color: var(--rhc-text-tertiary);
+    background: var(--rhc-surface-sunken);
+    border-top: 1px solid var(--rhc-divider);
+    border-radius: 0 0 var(--rhc-radius-lg) var(--rhc-radius-lg);
+}
+
+.palette-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--rhc-space-half);
+}
+
+@media (max-width: 560px) {
+    .palette {
+        top: 8vh;
+        max-height: 76vh;
+    }
+
+    .palette-footer {
+        display: none;
+    }
+}
